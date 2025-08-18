@@ -170,7 +170,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
 
                 <div className="d-flex flex-column gap-2">
                   <a
-                    href="tel:+525555555555"
+                    href="tel:+525512999642"
                     className="pill-btn pill-outline d-inline-flex align-items-center justify-content-center"
                     aria-label="Llamar al consultorio"
                   >
@@ -178,7 +178,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
                     Teléfono
                   </a>
                   <a
-                    href="mailto:contacto@walfredrrueda.com"
+                    href="mailto:contacto@walfredrueda.com"
                     className="pill-btn pill-outline d-inline-flex align-items-center justify-content-center"
                     aria-label="Enviar email"
                   >
@@ -186,7 +186,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
                     Email
                   </a>
                   <a
-                    href="https://wa.me/525555555555"
+                    href="https://wa.me/525512999642"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pill-btn pill-outline d-inline-flex align-items-center justify-content-center"
@@ -205,23 +205,6 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Franja-resumen de ubicaciones (sustituye a la card grande redundante) */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="locations-banner shadow-custom">
-              <div className="d-flex flex-wrap align-items-center gap-2">
-                <span className="chip chip-place">Polanco</span>
-                <span className="text-muted small me-3">Av Presidente Masaryk 134-Int. 402</span>
-                <span className="chip chip-place">Santa Fe</span>
-                <span className="text-muted small">Vasco de Quiroga 3900 – Torre B, Piso 5</span>
-              </div>
-              <a href="#ubicaciones" className="pill-btn pill-outline ms-auto">
-                Ver detalles
-              </a>
             </div>
           </div>
         </div>

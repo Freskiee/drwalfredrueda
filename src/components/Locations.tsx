@@ -10,14 +10,14 @@ const Locations: React.FC<LocationsProps> = ({ onOpenChat }) => {
     {
       name: 'Briyam Medical Polanco',
       address: 'Av Presidente Masaryk 134-Int. 402. Polanco, Polanco V Secc, Miguel Hidalgo',
-      image: 'https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg?auto=compress&cs=tinysrgb&w=800',
-      mapUrl: 'https://goo.gl/maps/example1'
+      image: '/images/masaryk.webp',
+      mapUrl: 'https://www.google.com/maps/place/Av.+Pdte.+Masaryk+134,+Polanco,+Polanco+V+Secc,+Miguel+Hidalgo,+11560+Ciudad+de+M%C3%A9xico,+CDMX/@19.4312613,-99.1895345,17z/data=!3m1!4b1!4m6!3m5!1s0x85d1f8ab28ff9397:0x66381ba05024771f!8m2!3d19.4312613!4d-99.1869596!16s%2Fg%2F11ydbl24rr?entry=ttu&g_ep=EgoyMDI1MDgxMy4wIKXMDSoASAFQAw%3D%3D'
     },
     {
       name: 'Briyam Medical Center Santa Fe',
       address: 'Vasco de Quiroga 3900-Torre B, Piso 5. Santa Fe, Contadero. Cuajimalpa de Morelos',
-      image: 'https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?auto=compress&cs=tinysrgb&w=800',
-      mapUrl: 'https://goo.gl/maps/example2'
+      image: '/images/santafe.jpg',
+      mapUrl: 'https://www.google.com/maps/place/Corporativo+Diamante+Santa+Fe,+Vasco+de+Quiroga+3900-Torre+B,+Piso+5,+Lomas+de+Santa+Fe,+Contadero,+Miguel+Hidalgo,+05348+Ciudad+de+M%C3%A9xico,+CDMX/@19.36079,-99.2812109,17z/data=!3m1!4b1!4m6!3m5!1s0x85d20734acbe7905:0x636ed8c5fe4a7968!8m2!3d19.36079!4d-99.278636!16s%2Fg%2F11m6qy0nv0?entry=ttu&g_ep=EgoyMDI1MDgxMy4wIKXMDSoASAFQAw%3D%3D'
     }
   ];
 

@@ -24,11 +24,11 @@ const Footer: React.FC = () => {
             <ul className="list-unstyled">
               <li className="small mb-2">
                 <Phone size={14} className="me-2" />
-                55 5555 5555
+                55 12 99 96 42
               </li>
               <li className="small">
                 <Mail size={14} className="me-2" />
-                contacto@walfredrrueda.com
+                contacto@walfredrueda.com
               </li>
             </ul>
           </div>
