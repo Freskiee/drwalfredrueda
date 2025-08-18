@@ -1,63 +1,57 @@
-import React from 'react';
-import { Phone, Mail, Facebook, Instagram, Twitter } from 'lucide-react';
+import React from "react";
+import { Phone, Mail, Facebook, Instagram, Twitter } from "lucide-react";
 
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
       <div className="container">
-        <div className="row">
-          <div className="col-lg-3 col-md-6 mb-4">
-            <h6 className="text-primary-custom mb-3">Dr. Walfred Rueda</h6>
-            <p className="small">Psiquiatría con calidez humana y rigor científico</p>
-          </div>
-          
-          <div className="col-lg-3 col-md-6 mb-4">
-            <h6 className="mb-3">Legal</h6>
-            <ul className="list-unstyled">
-              <li><a href="#" className="small">Aviso de privacidad</a></li>
-              <li><a href="#" className="small">Términos y condiciones</a></li>
+        <div className="footer-grid">
+          {/* Marca */}
+          <section className="f-block">
+            <h6 className="f-title">Dr. Walfred Rueda</h6>
+            <p className="f-note">Psiquiatría con calidez humana y rigor científico</p>
+          </section>
+
+          {/* Legal */}
+          <nav className="f-block">
+            <h6 className="f-title">Legal</h6>
+            <ul className="f-links">
+              <li><a href="#">Aviso de privacidad</a></li>
+              <li><a href="#">Términos y condiciones</a></li>
             </ul>
-          </div>
-          
-          <div className="col-lg-3 col-md-6 mb-4">
-            <h6 className="mb-3">Contacto</h6>
-            <ul className="list-unstyled">
-              <li className="small mb-2">
-                <Phone size={14} className="me-2" />
-                55 12 99 96 42
+          </nav>
+
+          {/* Contacto */}
+          <address className="f-block">
+            <h6 className="f-title">Contacto</h6>
+            <ul className="f-links">
+              <li className="f-row">
+                <Phone size={14} className="me-2" aria-hidden="true" />
+                <a href="tel:+525512999642">55&nbsp;12&nbsp;99&nbsp;96&nbsp;42</a>
               </li>
-              <li className="small">
-                <Mail size={14} className="me-2" />
-                contacto@walfredrueda.com
+              <li className="f-row">
+                <Mail size={14} className="me-2" aria-hidden="true" />
+                <a href="mailto:contacto@walfredrueda.com">contacto@walfredrueda.com</a>
               </li>
             </ul>
-          </div>
-          
-          <div className="col-lg-3 col-md-6 mb-4">
-            <h6 className="mb-3">Redes sociales</h6>
-            <div className="d-flex gap-3">
-              <a href="#" aria-label="Facebook">
-                <Facebook size={20} />
-              </a>
-              <a href="#" aria-label="Instagram">
-                <Instagram size={20} />
-              </a>
-              <a href="#" aria-label="Twitter">
-                <Twitter size={20} />
-              </a>
+          </address>
+
+          {/* Redes */}
+          <section className="f-block">
+            <h6 className="f-title">Redes sociales</h6>
+            <div className="f-social">
+              <a className="f-chip" href="#" aria-label="Facebook"><Facebook size={16} /></a>
+              <a className="f-chip" href="#" aria-label="Instagram"><Instagram size={16} /></a>
+              <a className="f-chip" href="#" aria-label="Twitter"><Twitter size={16} /></a>
             </div>
-          </div>
+          </section>
         </div>
-        
-        <hr className="my-4" />
-        
-        <div className="row">
-          <div className="col-12 text-center">
-            <p className="small text-muted mb-0">
-              © 2025 Dr. Walfred Rueda. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
+
+        <hr className="f-sep" />
+
+        <p className="f-copy">
+          © 2025 Dr. Walfred Rueda. Todos los derechos reservados.
+        </p>
       </div>
     </footer>
   );
