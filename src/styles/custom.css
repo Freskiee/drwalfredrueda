@@ -651,3 +651,125 @@ html:not(.js-enabled) .reveal-base {
   70%  { transform: scale(1.2); opacity:0; }
   100% { transform: scale(1.2); opacity:0; }
 }
+/* ===== Servicios – CTA móvil bien alineado ===== */
+.svc-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem 1rem 0.75rem 1rem; /* acolchado homogéneo */
+  border-radius: 18px;
+}
+
+.svc-card .svc-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.svc-cta {
+  display: block;
+  width: 100%;
+  margin-top: auto;             /* pega el botón al fondo de la card */
+  border-radius: 999px;
+  padding: .66rem 1rem;
+  font-weight: 700;
+  border: 1.5px solid rgba(15,62,87,.16);
+  background: #eef6f9;
+  color: var(--primary-color);
+  box-shadow: 0 1px 2px rgba(15,62,87,.06) inset;
+  transition: var(--transition);
+}
+
+.svc-cta:hover {
+  background: #e7f1f6;
+  border-color: rgba(15,62,87,.28);
+}
+
+/* Ícono/medallón arriba centrado */
+.svc-icon-badge {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto .5rem auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #eef5ff, #f6fbff);
+  box-shadow: inset 0 8px 16px rgba(15,62,87,.06), 0 0 0 6px rgba(108,92,231,.05);
+}
+
+/* Móviles: que nada “desborde” */
+@media (max-width: 575.98px) {
+  .svc-card {
+    border-radius: 16px;
+    padding: .9rem .9rem .7rem .9rem;
+  }
+  .svc-cta {
+    padding: .7rem 1rem;
+    box-shadow: none;          /* evita resaltos que empujan */
+  }
+}
+/* ===== Servicios: pulido de cards + badge + CTA ===== */
+
+/* Look suave al pasar y borde fino */
+.service-clean {
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.service-clean:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15,62,87,0.10), inset 0 -1px 0 rgba(15,62,87,0.06);
+}
+
+/* Emoji dentro de “medallón” coherente con tu UI */
+.emoji-badge {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  margin-inline: auto;
+  background: linear-gradient(135deg, #eef2ff, #f6fbff);
+  box-shadow: inset 0 10px 18px rgba(15,62,87,.06), 0 0 0 6px rgba(108,92,231,.06);
+  font-size: 26px;
+}
+
+/* CTA suave (móvil) – ocupa ancho completo de la card */
+.svc-cta {
+  display: block;
+  width: 100%;
+  border-radius: 999px;
+  padding: .7rem 1rem;
+  font-weight: 700;
+  border: 1.5px solid rgba(15,62,87,.16);
+  background: #eef6f9;
+  color: var(--primary-color);
+  box-shadow: 0 1px 2px rgba(15,62,87,.06) inset;
+  transition: var(--transition);
+}
+.svc-cta:hover {
+  background: #e7f1f6;
+  border-color: rgba(15,62,87,.28);
+}
+
+/* CTA ghost (desktop) – reutiliza tu estilo del hero */
+.pill-ghost {
+  border-radius: 999px;
+  padding: 12px 22px;
+  border: 2px solid rgba(15,15,15,.12);
+  color: var(--primary-color);
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-weight: 700;
+  transition: all .18s ease;
+}
+.pill-ghost:hover{
+  background: rgba(255,255,255,.16);
+  border-color: rgba(15,15,15,.22);
+}
+
+/* Ajustes responsivos para cards */
+@media (max-width: 575.98px){
+  .service-clean { border-radius: 16px; }
+  .emoji-badge { width: 50px; height: 50px; font-size: 24px; }
+}
