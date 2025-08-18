@@ -423,3 +423,231 @@ html:not(.js-enabled) .reveal-base {
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* Tarjeta limpia con hover sutil */
+#servicios .service-clean{
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+  border: 1px solid rgba(15,62,87,0.06);
+  background: linear-gradient(180deg,#ffffff 0%,#ffffff 60%,#fbfdff 100%);
+  border-radius: 22px;
+}
+#servicios .service-clean:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(15,62,87,.10);
+  border-color: rgba(15,62,87,0.12);
+  background: linear-gradient(180deg,#ffffff 0%,#f7fbff 60%,#f3f9ff 100%);
+}
+
+/* Emoji burbuja */
+#servicios .emoji-badge{
+  width:60px;height:60px;border-radius:50%;
+  margin:0 auto 6px;display:grid;place-items:center;font-size:28px;
+  background: linear-gradient(135deg,#eef7fb 0%,#f7fbff 100%);
+  box-shadow: inset 0 6px 14px rgba(15,62,87,.06), 0 0 0 6px rgba(76,144,164,.06);
+}
+
+/* === CTA “Más info” (sin heredar botones Bootstrap) === */
+#servicios .subtle-cta{
+  all: unset; /* evita estilos de .btn, etc. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: .96rem;
+  color: var(--primary-color);
+  border: 2px solid rgba(15,62,87,.22);
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 2px 8px rgba(15,62,87,.06);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease, color .18s ease;
+}
+#servicios .subtle-cta:hover{
+  border-color: rgba(15,62,87,.34);
+  background: #f4f9fb;
+  color: var(--secondary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15,62,87,.10);
+}
+#servicios .subtle-cta:focus{
+  outline: 3px solid rgba(58,125,151,.25);
+  outline-offset: 2px;
+}
+#servicios .subtle-cta:active{
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(15,62,87,.08);
+}
+
+/* Responsive */
+@media (max-width:575.98px){
+  #servicios .card .card-body{ padding:14px; }
+  #servicios .emoji-badge{ width:52px;height:52px;font-size:24px; }
+  #servicios .subtle-cta{ width:100%; }
+}
+
+/* --- Videos: tarjetas limpias y visibles --- */
+#videos .video-card{
+  border-radius: 18px;
+  background: #fff;               /* asegura contraste/fondo */
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#videos .video-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(15,62,87,.10);
+}
+
+/* iframe responsive con borde suave */
+#videos .video-embed{
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 14px;
+}
+#videos .video-embed iframe{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+  border-radius: 14px;
+}
+
+/* Tarjeta Facebook bien visible */
+#videos .fb-card{
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  min-height: 260px;              /* asegura altura */
+}
+#videos .fb-badge{
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: #1877F2;
+  background: #EEF3FF;
+  box-shadow: inset 0 6px 12px rgba(24,119,242,0.08), 0 0 0 6px rgba(24,119,242,0.07);
+}
+
+/* CTA sutil reutilizable (si no estaba ya) */
+.subtle-cta{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem;
+  padding: .6rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #124b63;                  /* azul médico suave */
+  background: #f2f7fb;             /* pill claro */
+  border: 1.5px solid rgba(15,62,87,.18);
+  transition: all .18s ease;
+}
+.subtle-cta:hover{
+  background: #eaf3f9;
+  border-color: rgba(15,62,87,.28);
+  color: #0F3E57;
+}
+
+/* --- Videos: estructura sin “tira” blanca y con pie de tarjeta --- */
+#videos .video-card{
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;                       /* recorta bordes del iframe */
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#videos .video-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(15,62,87,.10);
+}
+
+/* Contenedor 16:9 del iframe */
+#videos .video-embed{
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  /* redondeo solo arriba para que el pie encaje perfecto */
+  border-radius: 18px 18px 0 0;
+  background: #000;                       /* evita parpadeo blanco mientras carga */
+}
+#videos .video-embed iframe{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Pie de tarjeta con título + CTA */
+#videos .video-caption{
+  padding: .9rem 1rem 1rem;
+  border-top: 1px solid rgba(15,62,87,.06);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+#videos .video-caption h6{
+  margin: 0;
+  font-weight: 700;
+  color: #16384a;
+  line-height: 1.25;
+}
+
+/* CTA sutil reutilizable (por si no lo tenías) */
+.subtle-cta{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem;
+  padding: .55rem .9rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #124b63;
+  background: #f2f7fb;
+  border: 1.5px solid rgba(15,62,87,.18);
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+.subtle-cta:hover{
+  background: #eaf3f9;
+  border-color: rgba(15,62,87,.28);
+  color: #0F3E57;
+}
+
+@media (max-width: 575.98px){
+  #videos .video-caption{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+}
+
+/* Poster clickable (reemplaza al iframe hasta que se da clic) */
+#videos .video-poster{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  background-size:cover; background-position:center;
+  border:0; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .18s ease, filter .18s ease;
+}
+#videos .video-poster:hover{ transform: scale(1.01); }
+
+#videos .video-poster svg{
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.4));
+}
+
+/* pulso suave detrás del ícono de play */
+#videos .video-playpulse{
+  position:absolute; width:88px; height:88px; border-radius:50%;
+  background: radial-gradient(circle, rgba(255,255,255,.65), rgba(255,255,255,0));
+  animation: vPulse 1.8s infinite ease-out;
+}
+@keyframes vPulse{
+  0%   { transform: scale(.75); opacity:.85; }
+  70%  { transform: scale(1.2); opacity:0; }
+  100% { transform: scale(1.2); opacity:0; }
+}

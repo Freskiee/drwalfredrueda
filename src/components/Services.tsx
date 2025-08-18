@@ -94,11 +94,11 @@ const Services: React.FC<ServicesProps> = ({ onOpenChat }) => {
                   <div className="mt-auto">
                     <button
                       type="button"
-                      className="pill-btn pill-outline subtle-cta"
+                      className="pill-btn subtle-cta"
                       onClick={() => onOpenChat(it.id)}
                       aria-label={`Más información sobre ${it.title}`}
                     >
-                      Más info
+                      Chatear
                     </button>
                   </div>
                 </div>
@@ -108,57 +108,6 @@ const Services: React.FC<ServicesProps> = ({ onOpenChat }) => {
         </div>
       </div>
 
-      {/* Estilos locales suaves para no depender del hover azul agresivo */}
-      <style>{`
-        /* Tarjeta limpia con hover sutil */
-        #servicios .service-clean {
-          transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
-          border: 1px solid rgba(15,62,87,0.06);
-          background: linear-gradient(180deg, #ffffff 0%, #ffffff 60%, #fbfdff 100%);
-        }
-        #servicios .service-clean:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 28px rgba(15,62,87,.10);
-          border-color: rgba(15,62,87,0.12);
-          background: linear-gradient(180deg, #ffffff 0%, #f7fbff 60%, #f3f9ff 100%);
-        }
-
-        /* Emoji dentro de burbuja suave */
-        #servicios .emoji-badge {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          margin: 0 auto 6px;
-          display: grid;
-          place-items: center;
-          font-size: 28px;
-          background: linear-gradient(135deg, #eef7fb 0%, #f7fbff 100%);
-          box-shadow: inset 0 6px 14px rgba(15,62,87,.06), 0 0 0 6px rgba(76, 144, 164, .06);
-        }
-
-        /* CTA pill más discreto (abre chat pero luce "Más info") */
-        #servicios .subtle-cta {
-          font-weight: 700;
-          border-width: 2px;
-          border-color: rgba(15,62,87,.22);
-          color: var(--primary-color);
-          background: #fff;
-        }
-        #servicios .subtle-cta:hover {
-          border-color: rgba(15,62,87,.35);
-          background: #f4f9fb;
-          color: var(--secondary-color);
-          transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(15,62,87,.10);
-        }
-
-        /* Ajustes responsivos */
-        @media (max-width: 575.98px) {
-          #servicios .card .card-body { padding: 14px; }
-          #servicios .emoji-badge { width: 52px; height: 52px; font-size: 24px; }
-          #servicios .subtle-cta { width: 100%; }
-        }
-      `}</style>
     </section>
   );
 };
