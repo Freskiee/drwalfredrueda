@@ -755,14 +755,37 @@ h6 {
 
 #contacto .pill-primary {
   border: 0;
-  color: #fff;
-  background: var(--brand-gradient);
-  box-shadow: 0 12px 26px rgba(108, 92, 231, .25);
+  background: #18486b !important; /* Fallback sólido, muy visible */
+  box-shadow: 0 12px 26px rgba(15, 62, 87, .18);
+  color: #fff !important;
+}
+#contacto .pill-primary:hover,
+#contacto .pill-primary:focus,
+#contacto .pill-primary:active {
+  color: #fff !important;
+  background: #0f3e57 !important;
+  filter: brightness(1.07);
+  text-decoration: none;
+  outline: none;
+}
+#contacto .pill-btn {
+  color: #0F3E57;
+  background: #fff;
+}
+#contacto .pill-btn:disabled {
+  color: #b3b9c9 !important;
+  background: #f1f3f6 !important;
+  border-color: #e0e4ec !important;
+  opacity: 1;
 }
 
-#contacto .pill-primary:hover {
+#contacto .pill-primary:hover,
+#contacto .pill-primary:focus,
+#contacto .pill-primary:active {
+  color: #fff !important;
   filter: brightness(1.04);
-  transform: translateY(-1px);
+  text-decoration: none;
+  outline: none;
 }
 
 /* Banner de ubicaciones */
