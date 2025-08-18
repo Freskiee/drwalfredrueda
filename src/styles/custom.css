@@ -384,3 +384,42 @@ h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.2;}
 @media (max-width: 575.98px){
   .btn-holo::after{ opacity:.35; animation-duration: 9s; }
 }
+
+/* === Scroll-Reveal: utilidades seguras === */
+.reveal-base {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: transform .6s ease, opacity .6s ease;
+  will-change: transform, opacity;
+}
+.reveal-up { transform: translateY(18px); }
+.reveal-left { transform: translateX(-18px); }
+.reveal-right { transform: translateX(18px); }
+.reveal-fade { transform: none; }
+
+.reveal-base.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Delays con data-attribute */
+[data-reveal-delay="50"]  { transition-delay: .05s; }
+[data-reveal-delay="100"] { transition-delay: .1s; }
+[data-reveal-delay="150"] { transition-delay: .15s; }
+[data-reveal-delay="200"] { transition-delay: .2s; }
+[data-reveal-delay="250"] { transition-delay: .25s; }
+[data-reveal-delay="300"] { transition-delay: .3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-base {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Fallback: si JS no carga o falla initReveal, no se quedan ocultos */
+html:not(.js-enabled) .reveal-base {
+  opacity: 1 !important;
+  transform: none !important;
+}

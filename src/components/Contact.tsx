@@ -34,8 +34,10 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
         {/* encabezado */}
         <div className="row">
           <div className="col-12 text-center mb-5">
-            <h2 className="text-primary-custom mb-2">Información de Contacto</h2>
-            <p className="text-muted lead m-0">
+            <h2 className="text-primary-custom mb-2 reveal-base reveal-up">
+              Información de Contacto
+            </h2>
+            <p className="text-muted lead m-0 reveal-base reveal-fade" data-reveal-delay="100">
               Todo lo que necesitas saber para agendar tu consulta
             </p>
           </div>
@@ -44,7 +46,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
         {/* tarjetas “burbuja”: Modalidades / Horarios / Pagos / Contacto */}
         <div className="row g-4 mb-4">
           {/* Modalidades */}
-          <div className="col-12 col-md-6 col-lg-3">
+          <div className="col-12 col-md-6 col-lg-3 reveal-base reveal-up" data-reveal-delay="100">
             <div className="card shadow-custom h-100 border-0 bubble-card">
               <div className="card-body p-4">
                 <div className="bubble-icon">
@@ -73,7 +75,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
           </div>
 
           {/* Horarios */}
-          <div className="col-12 col-md-6 col-lg-3">
+          <div className="col-12 col-md-6 col-lg-3 reveal-base reveal-up" data-reveal-delay="150">
             <div className="card shadow-custom h-100 border-0 bubble-card">
               <div className="card-body p-4">
                 <div className="bubble-icon">
@@ -109,7 +111,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
           </div>
 
           {/* Pagos */}
-          <div className="col-12 col-md-6 col-lg-3">
+          <div className="col-12 col-md-6 col-lg-3 reveal-base reveal-up" data-reveal-delay="200">
             <div className="card shadow-custom h-100 border-0 bubble-card">
               <div className="card-body p-4">
                 <div className="bubble-icon">
@@ -160,7 +162,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
           </div>
 
           {/* Contacto / Acciones */}
-          <div className="col-12 col-md-6 col-lg-3">
+          <div className="col-12 col-md-6 col-lg-3 reveal-base reveal-up" data-reveal-delay="250">
             <div className="card shadow-custom h-100 border-0 bubble-card">
               <div className="card-body p-4">
                 <div className="bubble-icon">
@@ -211,7 +213,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
 
         {/* Aviso */}
         <div className="row">
-          <div className="col-12">
+          <div className="col-12 reveal-base reveal-fade" data-reveal-delay="100">
             <div className="alert alert-warning d-flex align-items-start border-0 shadow-sm rounded-3 contact-alert">
               <AlertTriangle size={20} className="me-3 text-warning flex-shrink-0" />
               <div className="small">

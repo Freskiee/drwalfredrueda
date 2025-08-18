@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { initReveal } from "./utils/reveal";
 import Topbar from './components/Topbar';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import WelcomeSection from './components/WelcomeSection';
 import Services from './components/Services';
 import About from './components/About';
 import Credentials from './components/Credentials';
@@ -11,12 +13,18 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import ChatWidget from './components/Chat/ChatWidget';
 
-import './styles/custom.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css'; // 1) primero bootstrap
+import './styles/custom.css';                  // 2) luego tus overrides
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [initialChatService, setInitialChatService] = useState<string | undefined>();
+
+  // Inicializa el IntersectionObserver cuando el árbol ya está montado
+  useEffect(() => {
+    const cleanup = initReveal();
+    return cleanup;
+  }, []);
 
   const handleOpenChat = (service?: string) => {
     setInitialChatService(service);
@@ -24,19 +32,22 @@ function App() {
   };
 
   const handleToggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-    if (!isChatOpen) {
-      setInitialChatService(undefined);
-    }
+    setIsChatOpen((prev) => {
+      const next = !prev;
+      if (!next) setInitialChatService(undefined);
+      return next;
+    });
   };
 
   return (
     <div className="App">
       <Topbar />
       <Navbar onOpenChat={handleOpenChat} />
-      
+
       <main>
+        {/* Asegúrate de que dentro de cada componente pongamos clases reveal-* */}
         <Hero onOpenChat={handleOpenChat} />
+        <WelcomeSection />
         <Services onOpenChat={handleOpenChat} />
         <About />
         <Credentials />
@@ -44,10 +55,10 @@ function App() {
         <Locations onOpenChat={handleOpenChat} />
         <Contact onOpenChat={handleOpenChat} />
       </main>
-      
+
       <Footer />
-      
-      <ChatWidget 
+
+      <ChatWidget
         isOpen={isChatOpen}
         onToggle={handleToggleChat}
         initialService={initialChatService}
