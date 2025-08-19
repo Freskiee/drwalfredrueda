@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 
 interface HeroProps {
@@ -6,47 +6,75 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const bgRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    if (prefersReduced) return; // respeta accesibilidad
+
+    let raf = 0;
+
+    const onScroll = () => {
+      if (!sectionRef.current || !bgRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+
+      // Mueve la imagen en función de su posición relativa al viewport.
+      // rect.top baja de 0→-altura al avanzar, así que usar -rect.top funciona bien.
+      const speed = 0.25; // 0.2–0.35 = suave
+      const translate = Math.max(-80, Math.min(80, -rect.top * speed)); // clamp
+
+      // Ligero scale para evitar bordes cuando se traduce
+      bgRef.current.style.transform = `translateY(${translate}px) scale(1.06)`;
+    };
+
+    const loop = () => {
+      onScroll();
+      raf = requestAnimationFrame(loop);
+    };
+
+    raf = requestAnimationFrame(loop);
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <section
       id="inicio"
+      ref={sectionRef}
       className="hero position-relative overflow-hidden"
-      style={{
-        minHeight: "68vh",
-        display: "flex",
-        alignItems: "center",
-        backgroundAttachment: "fixed",
-        backgroundPosition: "center",
-        backgroundSize: "cover",
-      }}
     >
-      {/* Overlay para contraste: azul profundo → transparente */}
-      <div
+      {/* Imagen de fondo: iOS-friendly + parallax con transform */}
+      <img
+        ref={bgRef}
+        src="/images/drWalter.png"
+        alt=""
         aria-hidden="true"
-        className="position-absolute top-0 start-0 w-100 h-100"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(16,37,66,.55) 0%, rgba(16,37,66,.35) 40%, rgba(16,37,66,.28) 100%)",
-        }}
+        className="hero-bg"
       />
+
+      {/* Overlay para contraste */}
+      <div aria-hidden="true" className="hero-overlay" />
 
       <div className="container position-relative">
         <div className="row justify-content-center">
           <div className="col-12 col-xl-10">
             <div className="text-center px-3">
-              <h1 className="hero-title mb-2">
-                DR. WALFRED RUEDA
-              </h1>
+              <h1 className="hero-title mb-2">DR. WALFRED RUEDA</h1>
 
-              <h2 className="hero-subtitle mb-3">
-                Psiquiatría y Salud Sexual
-              </h2>
+              <h2 className="hero-subtitle mb-3">Psiquiatría y Salud Sexual</h2>
 
               <p className="hero-lead mb-4">
                 Psiquiatría con calidez humana y rigor científico.
               </p>
 
               <div className="d-flex flex-column flex-md-row gap-2 justify-content-center">
-                {/* CTA principal */}
                 <button
                   type="button"
                   className="btn hero-pill"
@@ -57,7 +85,6 @@ const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
                   Abrir chat
                 </button>
 
-                {/* CTA WhatsApp (ghost) */}
                 <a
                   href="https://wa.me/525512999642"
                   target="_blank"
@@ -66,7 +93,6 @@ const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
                   aria-label="Contactar por WhatsApp al 55 1299 9642"
                   style={{ textDecoration: "none" }}
                 >
-                  {/* Ícono oficial WhatsApp */}
                   <svg
                     width="19"
                     height="19"

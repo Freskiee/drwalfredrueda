@@ -1864,3 +1864,71 @@ html:not(.js-enabled) .reveal-base {
   .footer .f-sep{ margin: .9rem 0 .6rem; }
   .footer .f-copy{ font-size: .78rem; }
 }
+/* ===== HERO background fiable en iOS ===== */
+.hero{
+  position: relative;
+  min-height: clamp(55vh, 68dvh, 86dvh); /* usa dvh cuando está disponible */
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Capa de imagen: sustituye background-* por un <img> con object-fit */
+.hero-bg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Control fino de encuadre con una variable */
+  object-position: center var(--hero-pos-y, 32%);
+  transform: translateZ(0); /* evita jitter en iOS */
+  will-change: transform;
+  z-index: 0;
+}
+
+/* Overlay de contraste */
+.hero-overlay{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 37, 66, .55) 0%,
+    rgba(16, 37, 66, .35) 40%,
+    rgba(16, 37, 66, .28) 100%
+  );
+}
+
+/* Contenido del hero por encima */
+.hero .container{
+  position: relative;
+  z-index: 2;
+}
+
+/* --- Ajustes de encuadre por dispositivo / orientación --- */
+
+/* iOS Safari feature-detect */
+@supports (-webkit-touch-callout: none) {
+  /* Evita usar cualquier background del section en iOS */
+  .hero{
+    background: none !important;
+    background-attachment: scroll !important; /* por si queda alguna regla vieja */
+  }
+}
+
+/* iPad y tablets horizontales: baja un poco el encuadre */
+@media (min-width: 768px) and (max-width: 1180px) {
+  .hero{ --hero-pos-y: 38%; }
+}
+
+/* iPad/Tablet en vertical: un poco más abajo */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .hero{ --hero-pos-y: 42%; }
+}
+
+/* Móviles: encuadre algo más centrado */
+@media (max-width: 575.98px){
+  .hero{ --hero-pos-y: 36%; }
+}
