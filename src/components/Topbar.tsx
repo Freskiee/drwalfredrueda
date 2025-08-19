@@ -22,7 +22,7 @@ const Topbar: React.FC = () => {
                 aria-label="Enviar email"
               >
                 <Mail size={14} />
-                <span className="d-none d-md-inline">contacto@walfredrrueda.com</span>
+                <span className="d-none d-md-inline">contacto@walfredrueda.com</span>
               </a>
             </div>
             <div className="d-flex align-items-center gap-2">
