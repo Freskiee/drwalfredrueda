@@ -145,7 +145,7 @@ const Videos: React.FC = () => {
               <div className="video-embed">
                 <iframe
                   src={fbEmbed}
-                  title="Video en Facebook"
+                  title="Proyecto Mente Creativa"
                   scrolling="no"
                   allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                   allowFullScreen
@@ -153,7 +153,7 @@ const Videos: React.FC = () => {
                 />
               </div>
               <div className="video-caption">
-                <h6 className="mb-1">Video en Facebook</h6>
+                <h6 className="mb-1">Proyecto Mente Creativa</h6>
                 <a
                   href={fbWatch}
                   target="_blank"

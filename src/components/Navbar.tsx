@@ -20,8 +20,10 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenChat }) => {
     { name: 'Inicio', href: '#inicio' },
     { name: 'Servicios', href: '#servicios' },
     { name: 'Sobre mí', href: '#sobre-mi' },
+    { name: 'Testimonios', href: '#testimonios' },
     { name: 'Videos', href: '#videos' },
     { name: 'Ubicaciones', href: '#ubicaciones' },
+    { name: 'FAQ', href: '#faq' },
     { name: 'Contacto', href: '#contacto' },
   ];
 
