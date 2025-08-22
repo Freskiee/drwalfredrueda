@@ -29,9 +29,15 @@ function App() {
   }, []);
 
   const handleOpenChat = (service?: string) => {
-    setInitialChatService(service);
+    // si viene de Services: prefija "services:"
+    if (service && !service.includes(':')) {
+      setInitialChatService(`services:${service}`);
+    } else {
+      setInitialChatService(service);
+    }
     setIsChatOpen(true);
   };
+
 
   const handleToggleChat = () => {
     setIsChatOpen((prev) => {

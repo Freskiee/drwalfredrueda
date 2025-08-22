@@ -2,7 +2,7 @@ import React from 'react';
 import { MapPin, ExternalLink, MessageCircle } from 'lucide-react';
 
 interface LocationsProps {
-  onOpenChat: () => void;
+  onOpenChat: (service?: string) => void;
 }
 
 const Locations: React.FC<LocationsProps> = ({ onOpenChat }) => {
@@ -80,19 +80,19 @@ const Locations: React.FC<LocationsProps> = ({ onOpenChat }) => {
                     <span>{location.address}</span>
                   </p>
 
-                  <div className="d-flex gap-2 flex-wrap">
+                  <div className="d-flex flex-row gap-2 flex-md-row flex-column flex-sm-column flex-wrap flex-md-nowrap">
                     <a
                       href={location.mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-outline-primary pill-btn pill-outline"
+                      className="btn btn-outline-primary pill-btn pill-outline flex-grow-1 w-50"
                     >
                       <ExternalLink size={16} className="me-2" />
                       Cómo llegar
                     </a>
                     <button
-                      className="btn btn-primary pill-btn pill-primary"
-                      onClick={onOpenChat}
+                      className="btn btn-primary pill-btn pill-primary flex-grow-1 w-50"
+                      onClick={() => onOpenChat(index === 0 ? 'locations:polanco' : 'locations:santafe')}
                       aria-label="Abrir chat para agendar en esta ubicación"
                     >
                       <MessageCircle size={16} className="me-2" />

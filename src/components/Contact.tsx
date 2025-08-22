@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface ContactProps {
-  onOpenChat: () => void;
+  onOpenChat: (service?: string) => void;
 }
 
 const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
@@ -199,7 +199,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
                   </a>
                   <button
                     className="pill-btn pill-primary d-inline-flex align-items-center justify-content-center"
-                    onClick={onOpenChat}
+                    onClick={() => onOpenChat('contact')}
                     aria-label="Abrir chat para agendar"
                   >
                     <Smartphone size={16} className="me-2" />

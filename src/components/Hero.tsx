@@ -78,7 +78,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
                 <button
                   type="button"
                   className="btn hero-pill"
-                  onClick={onOpenChat}
+                  onClick={() => onOpenChat()}
                   aria-label="Abrir chat para agendar cita"
                 >
                   <MessageCircle size={18} className="me-2" />

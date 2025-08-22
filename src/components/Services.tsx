@@ -1,3 +1,4 @@
+import { MessageCircle } from 'lucide-react';
 import React from 'react';
 
 interface ServicesProps {
@@ -55,23 +56,23 @@ const Services: React.FC<ServicesProps> = ({ onOpenChat }) => {
                   <p className="text-muted mb-3" style={{ minHeight: 40 }}>{it.description}</p>
 
                   <div className="mt-auto">
-                    {/* CTA suave (MÓVIL) */}
                     <button
                       type="button"
-                      className="svc-cta d-lg-none"
-                      onClick={() => onOpenChat(it.id)}
+                      className="pill-btn pill-primary w-100"
+                      onClick={() => {
+                        const map: Record<string, string> = {
+                          ansiedad: 'services:ansiedad',
+                          'estado-animo': 'services:depresion',
+                          'salud-sexual': 'services:disfuncion-erectil',
+                          'terapia-breve': 'services:ansiedad', // o lo que prefieras
+                          farmacologica: 'services:depresion',
+                          modalidades: 'contact',
+                        };
+                        onOpenChat(map[it.id] ?? 'contact');
+                      }}
                       aria-label={`Más información sobre ${it.title}`}
                     >
-                      Chatear
-                    </button>
-
-                    {/* CTA ghost (DESKTOP) */}
-                    <button
-                      type="button"
-                      className="pill-ghost d-none d-lg-inline-flex"
-                      onClick={() => onOpenChat(it.id)}
-                      aria-label={`Más información sobre ${it.title}`}
-                    >
+                      <MessageCircle size={16} className="me-2" />
                       Chatear
                     </button>
                   </div>

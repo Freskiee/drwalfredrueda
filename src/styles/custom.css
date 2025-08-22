@@ -753,24 +753,46 @@ h6 {
   color: #2f2b6f;
 }
 
-#contacto .pill-primary {
-  border: 0;
-  background: #18486b !important; /* Fallback sólido, muy visible */
-  box-shadow: 0 12px 26px rgba(15, 62, 87, .18);
-  color: #fff !important;
-}
 #contacto .pill-primary:hover,
 #contacto .pill-primary:focus,
 #contacto .pill-primary:active {
   color: #fff !important;
-  background: #0f3e57 !important;
-  filter: brightness(1.07);
+  background: #256ca1 !important;
+  filter: none;
   text-decoration: none;
   outline: none;
 }
-#contacto .pill-btn {
-  color: #0F3E57;
-  background: #fff;
+button.pill-btn, button.pill-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  padding: .8rem 1.25rem !important;
+  font-weight: 700 !important;
+  border: none !important;
+  background: #18486b !important;
+  color: #fff !important;
+  width: 100% !important;
+  min-height: 44px !important;
+  letter-spacing: .2px !important;
+  box-shadow: 0 8px 24px rgba(16, 31, 95, 0.15), 0 2px 6px rgba(15,62,87,.10) !important;
+  transition: transform .18s, box-shadow .18s, filter .18s !important;
+  text-decoration: none !important;
+  appearance: none !important;
+}
+button.pill-btn:hover, button.pill-btn:focus, button.pill-btn:active,
+button.pill-primary:hover, button.pill-primary:focus, button.pill-primary:active {
+  background: #256ca1 !important;
+  color: #fff !important;
+  filter: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+button.pill-btn:disabled, button.pill-primary:disabled {
+  color: #b3b9c9 !important;
+  background: #f1f3f6 !important;
+  border-color: #e0e4ec !important;
+  opacity: 1 !important;
 }
 #contacto .pill-btn:disabled {
   color: #b3b9c9 !important;
@@ -778,6 +800,32 @@ h6 {
   border-color: #e0e4ec !important;
   opacity: 1;
 }
+
+#ubicaciones .pill-btn,
+#ubicaciones .pill-primary,
+#ubicaciones .pill-outline {
+  padding: 0.5rem 1rem !important;
+  min-height: 40px !important;
+  font-size: 1rem !important;
+  flex: 1 1 0 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+@media (max-width: 575.98px) {
+  #ubicaciones .pill-btn,
+  #ubicaciones .pill-primary,
+  #ubicaciones .pill-outline {
+    width: 100% !important;
+    flex-basis: 100% !important;
+    margin-bottom: 8px;
+  }
+  #ubicaciones .d-flex.flex-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+}
+
 
 #contacto .pill-primary:hover,
 #contacto .pill-primary:focus,
@@ -1596,8 +1644,8 @@ html:not(.js-enabled) .reveal-base {
   justify-content: center;
 
   border-radius: 50%;
-  background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #3353e5 0%, #a0bddf 100%);
+  color: #ffffff;
   box-shadow: 0 6px 18px rgba(108, 92, 231, .25);
 }
 
