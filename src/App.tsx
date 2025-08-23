@@ -9,6 +9,7 @@ import About from './components/About';
 import Credentials from './components/Credentials';
 import Testimonials from './components/Testimonials';
 import Videos from './components/Videos';
+import React from 'react';
 import Locations from './components/Locations';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -19,6 +20,11 @@ import 'bootstrap/dist/css/bootstrap.min.css'; // 1) primero bootstrap
 import './styles/custom.css';                  // 2) luego overrides
 
 function App() {
+  // Siempre al refrescar, sitúa el scroll arriba
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [initialChatService, setInitialChatService] = useState<string | undefined>();
 

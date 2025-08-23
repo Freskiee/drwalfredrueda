@@ -31,7 +31,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenChat }) => {
     <>
       <nav className="navbar navbar-expand-lg sticky-top">
         <div className="container">
-          <a className="navbar-brand" href="#inicio">
+          <a className="navbar-brand" href="#inicio" onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); closeMenu(); }}>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>WALFRED RUEDA</div>
               <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#6C757D' }}>
@@ -43,7 +43,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenChat }) => {
           {/* Desktop Menu */}
           <div className="navbar-nav ms-auto d-none d-lg-flex flex-row gap-3">
             {navItems.map((item) => (
-              <a key={item.name} className="nav-link" href={item.href}>
+              <a
+                key={item.name}
+                className="nav-link"
+                href={item.href}
+                onClick={e => {
+                  if (item.name === 'Inicio') {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    closeMenu();
+                  }
+                }}
+              >
                 {item.name}
               </a>
             ))}
@@ -75,7 +86,13 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenChat }) => {
               key={item.name}
               className="nav-link d-block"
               href={item.href}
-              onClick={closeMenu}
+              onClick={e => {
+                if (item.name === 'Inicio') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                closeMenu();
+              }}
             >
               {item.name}
             </a>

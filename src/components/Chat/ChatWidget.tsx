@@ -110,7 +110,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
     'terapia-breve-apoyo': 'Veo que revisabas Terapia breve de apoyo.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
     'salud-sexual-integral': 'Veo que revisabas Salud sexual integral.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
     'psiquiatria-farmacologica': 'Veo que revisabas Psiquiatría farmacológica.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
-    'consulta-presencial-linea': 'Veo que revisabas Consulta presencial y en línea.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'consulta-presencial-linea': '¡Hola! 👋 Soy el asistente del Dr. Walfred Rueda. Estoy para ayudarte a agendar o resolver dudas.\n\n¿Me compartes tu nombre y edad? 😊',
   };
 
   const SERVICE_INTRO: Record<string, { intro: string; area?: 'Salud Mental' | 'Salud Sexual' | 'Ambas' }> = {
@@ -355,7 +355,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
     // Desde Contacto
     if (key === 'contact') {
       await addBot(
-        '¡Hola! Desde **Contacto** puedo ayudarte a coordinar tu consulta de forma sencilla.\n\n' +
+        '¡Hola! 👋 Soy el asistente del Dr. Walfred Rueda. Estoy para ayudarte a agendar o resolver dudas.\n\n' +
         '¿Me compartes tu nombre y edad? 😊'
       );
       askedRef.current.add('nombre');

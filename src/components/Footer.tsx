@@ -1,7 +1,12 @@
 import React from "react";
 import { Phone, Mail, Facebook, Instagram, Twitter } from "lucide-react";
 
+import AvisoDePrivacidad from "./AvisoDePrivacidad";
+import TerminosYCondiciones from "./TerminosYCondiciones";
+
 const Footer: React.FC = () => {
+  const [showAviso, setShowAviso] = React.useState(false);
+  const [showTerminos, setShowTerminos] = React.useState(false);
   return (
     <footer className="footer">
       <div className="container">
@@ -16,8 +21,12 @@ const Footer: React.FC = () => {
           <nav className="f-block">
             <h6 className="f-title">Legal</h6>
             <ul className="f-links">
-              <li><a href="#">Aviso de privacidad</a></li>
-              <li><a href="#">Términos y condiciones</a></li>
+              <li>
+                <a href="#" onClick={e => { e.preventDefault(); setShowAviso(true); }}>Aviso de privacidad</a>
+              </li>
+              <li>
+                <a href="#" onClick={e => { e.preventDefault(); setShowTerminos(true); }}>Términos y condiciones</a>
+              </li>
             </ul>
           </nav>
 
@@ -53,6 +62,50 @@ const Footer: React.FC = () => {
           © 2025 Dr. Walfred Rueda. Todos los derechos reservados.
         </p>
       </div>
+      {/* Modal para Aviso de Privacidad */}
+      {showAviso && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.4)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999
+        }}
+          onClick={() => setShowAviso(false)}
+        >
+          <div style={{ background: "#fff", borderRadius: 8, boxShadow: "0 4px 32px #0003", padding: 0, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <button style={{ float: "right", margin: 16, fontSize: 20, background: "none", border: "none", cursor: "pointer" }} aria-label="Cerrar" onClick={() => setShowAviso(false)}>&times;</button>
+            <AvisoDePrivacidad />
+          </div>
+        </div>
+      )}
+      {/* Modal para Términos y Condiciones */}
+      {showTerminos && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.4)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999
+        }}
+          onClick={() => setShowTerminos(false)}
+        >
+          <div style={{ background: "#fff", borderRadius: 8, boxShadow: "0 4px 32px #0003", padding: 0, maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <button style={{ float: "right", margin: 16, fontSize: 20, background: "none", border: "none", cursor: "pointer" }} aria-label="Cerrar" onClick={() => setShowTerminos(false)}>&times;</button>
+            <TerminosYCondiciones />
+          </div>
+        </div>
+      )}
     </footer>
   );
 };
