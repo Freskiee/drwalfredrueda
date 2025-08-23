@@ -61,12 +61,12 @@ const Services: React.FC<ServicesProps> = ({ onOpenChat }) => {
                       className="pill-btn pill-primary w-100"
                       onClick={() => {
                         const map: Record<string, string> = {
-                          ansiedad: 'services:ansiedad',
-                          'estado-animo': 'services:depresion',
-                          'salud-sexual': 'services:disfuncion-erectil',
-                          'terapia-breve': 'services:ansiedad', // o lo que prefieras
-                          farmacologica: 'services:depresion',
-                          modalidades: 'contact',
+                          ansiedad: 'services:trastornos-ansiedad',
+                          'estado-animo': 'services:estado-animo',
+                          'terapia-breve': 'services:terapia-breve-apoyo',
+                          'salud-sexual': 'services:salud-sexual-integral',
+                          farmacologica: 'services:psiquiatria-farmacologica',
+                          modalidades: 'services:consulta-presencial-linea',
                         };
                         onOpenChat(map[it.id] ?? 'contact');
                       }}

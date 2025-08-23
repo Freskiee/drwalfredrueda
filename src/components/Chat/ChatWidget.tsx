@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { MessageCircle, Send, X, ChevronLeft } from 'lucide-react';
 
 type StepKey = 'nombre' | 'area' | 'motivo' | 'modalidad' | 'sede' | 'horario' | 'resumen' | 'editar_sintomas';
@@ -103,29 +104,38 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
   }, [isOpen]);
 
   // 👇 map de intros por cada card de Servicios (ids que ya usas)
+  const SERVICE_GREETINGS: Record<string, string> = {
+    'estado-animo': 'Veo que revisabas Trastornos del estado de ánimo. Puedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'trastornos-ansiedad': 'Veo que revisabas Trastornos de ansiedad. Puedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'terapia-breve-apoyo': 'Veo que revisabas Terapia breve de apoyo.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'salud-sexual-integral': 'Veo que revisabas Salud sexual integral.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'psiquiatria-farmacologica': 'Veo que revisabas Psiquiatría farmacológica.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+    'consulta-presencial-linea': 'Veo que revisabas Consulta presencial y en línea.\nPuedo orientarte y ayudarte a agendar.\n¿Me compartes tu nombre y edad? 😊',
+  };
+
   const SERVICE_INTRO: Record<string, { intro: string; area?: 'Salud Mental' | 'Salud Sexual' | 'Ambas' }> = {
     'estado-animo': {
       area: 'Salud Mental',
-      intro: 'Estuviste viendo trastornos del estado de ánimo. Podemos acompañarte con un enfoque profesional y cercano.',
+      intro: SERVICE_GREETINGS['estado-animo'],
     },
-    'ansiedad': {
+    'trastornos-ansiedad': {
       area: 'Salud Mental',
-      intro: 'Veo que revisabas ansiedad. Puedo orientarte y ayudarte a agendar.',
+      intro: SERVICE_GREETINGS['trastornos-ansiedad'],
     },
-    'terapia-breve': {
+    'terapia-breve-apoyo': {
       area: 'Salud Mental',
-      intro: 'Consultaste terapia breve de apoyo. Es un abordaje focalizado y práctico; puedo contarte cómo se trabaja.',
+      intro: SERVICE_GREETINGS['terapia-breve-apoyo'],
     },
-    'salud-sexual': {
+    'salud-sexual-integral': {
       area: 'Salud Sexual',
-      intro: 'Estuviste viendo salud sexual integral. Trabajamos con absoluta confidencialidad y calidez.',
+      intro: SERVICE_GREETINGS['salud-sexual-integral'],
     },
-    'farmacologica': {
+    'psiquiatria-farmacologica': {
       area: 'Ambas',
-      intro: 'Revisaste psiquiatría farmacológica. El Dr. Rueda usa tratamientos basados en evidencia y seguimiento cercano.',
+      intro: SERVICE_GREETINGS['psiquiatria-farmacologica'],
     },
-    'modalidades': {
-      intro: 'Veo que te interesan las modalidades de consulta. Podemos decidir entre en línea o presencial, lo que te acomode.',
+    'consulta-presencial-linea': {
+      intro: SERVICE_GREETINGS['consulta-presencial-linea'],
     },
   };
 
@@ -157,7 +167,14 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
       await addBot('¿Cuáles son tus síntomas o motivo de consulta?');
       return;
     }
-    if (history.length === 0) return;
+    if (history.length === 0) {
+      if (step !== 'nombre') {
+        setStep('nombre');
+        setOptions([]);
+        await ask('nombre');
+      }
+      return;
+    }
     const h = [...history];
     const prev = h.pop();
     setHistory(h);
@@ -287,11 +304,35 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
     // Desde Servicios
     if (key.startsWith('services:')) {
       const id = key.split(':')[1] || '';
-      const cfg = SERVICE_INTRO[id];
-      if (cfg?.area) setUser(u => ({ ...u, area: cfg.area || '' }));
-      const intro = cfg?.intro || 'Puedo orientarte y ayudarte a agendar.';
+      // Alias para ids alternativos de cards
+      const idAliases: Record<string, string> = {
+        'ansiedad': 'trastornos-ansiedad',
+        'trastornos-ansiedad': 'trastornos-ansiedad',
+        'depresion': 'estado-animo',
+        'estado-animo': 'estado-animo',
+        'disfuncion-erectil': 'salud-sexual-integral',
+        'salud-sexual': 'salud-sexual-integral',
+        'salud-sexual-integral': 'salud-sexual-integral',
+        'terapia-breve': 'terapia-breve-apoyo',
+        'terapia_breve': 'terapia-breve-apoyo',
+        'terapia breve': 'terapia-breve-apoyo',
+        'terapia-breve-apoyo': 'terapia-breve-apoyo',
+        'farmacologica': 'psiquiatria-farmacologica',
+        'psiquiatria-farmacologica': 'psiquiatria-farmacologica',
+        'modalidades': 'consulta-presencial-linea',
+        'consulta-presencial-linea': 'consulta-presencial-linea',
+        'contact': 'consulta-presencial-linea'
+      };
 
-      await addBot(`${intro}\n\n¿Me compartes tu nombre y edad? 😊`);
+      const normalizedId = (id.replace(/_/g, '-').toLowerCase());
+      const finalId = idAliases[normalizedId] || normalizedId;
+      // console.log('DEBUG: initialService:', initialService, 'id:', id, 'normalizedId:', normalizedId, 'finalId:', finalId);
+      if (SERVICE_INTRO[finalId]?.area) setUser(u => ({ ...u, area: SERVICE_INTRO[finalId]?.area || '' }));
+      if (SERVICE_GREETINGS[finalId]) {
+        await addBot(SERVICE_GREETINGS[finalId]);
+      } else {
+        await addBot(`ERROR: id de servicio no reconocido (${finalId}). Contacta a soporte para agregarlo.`);
+      }
       askedRef.current.add('nombre');
       return;
     }
@@ -605,7 +646,13 @@ Gracias.`;
       <div className="chat-messages" aria-live="polite" aria-label="Mensajes del chat">
         {messages.map(m => (
           <div key={m.id} className={`message ${m.type}`}>
-            <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+            <div style={{ whiteSpace: 'pre-wrap' }}>
+              {m.type === 'bot' ? (
+                <ReactMarkdown>{m.text}</ReactMarkdown>
+              ) : (
+                m.text
+              )}
+            </div>
             <div className="message-time">
               <span className="chat-time">
                 {(() => {
@@ -693,12 +740,27 @@ Gracias.`;
       {/* Barra inferior (Atrás + input SOLO donde aplica) */}
       <div className="chat-input-area">
         <button
-          className="chat-back"
+          className="btn btn-link p-0 me-2"
+          tabIndex={0}
           aria-label="Regresar"
-          onClick={async () => { await goBack(); }}
-          style={{ display: canGoBack ? 'block' : 'none' }}
+          onClick={withLock(goBack)}
+          style={{
+            display: canGoBack ? 'flex' : 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            background: '#fff',
+            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.10)',
+            border: 'none',
+            padding: 0,
+            marginRight: 12,
+            cursor: 'pointer',
+            transition: 'box-shadow 0.2s',
+          }}
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={28} color="#1976d2" style={{ display: 'block' }} />
         </button>
 
         <input
