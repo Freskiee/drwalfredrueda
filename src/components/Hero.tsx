@@ -23,11 +23,11 @@ const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
 
       // Mueve la imagen en función de su posición relativa al viewport.
       // rect.top baja de 0→-altura al avanzar, así que usar -rect.top funciona bien.
-      const speed = 0.25; // 0.2–0.35 = suave
-      const translate = Math.max(-80, Math.min(80, -rect.top * speed)); // clamp
+      const speed = 0.45; // Más notorio
+      const translate = Math.max(-120, Math.min(120, -rect.top * speed)); // clamp más amplio
 
-      // Ligero scale para evitar bordes cuando se traduce
-      bgRef.current.style.transform = `translateY(${translate}px) scale(1.06)`;
+      // Scale más fuerte para evitar bordes y dar más efecto
+      bgRef.current.style.transform = `translateY(${translate}px) scale(1.12)`;
     };
 
     const loop = () => {

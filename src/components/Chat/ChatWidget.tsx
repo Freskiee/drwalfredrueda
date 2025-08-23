@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { MessageCircle, Send, X, ChevronLeft } from 'lucide-react';
 
-type StepKey = 'nombre' | 'area' | 'motivo' | 'modalidad' | 'sede' | 'horario' | 'resumen' | 'editar_sintomas';
+type StepKey = 'nombre' | 'area' | 'motivo' | 'modalidad' | 'sede' | 'horario' | 'resumen' | 'editar_sintomas' | 'editar';
 
 interface ChatMessage {
   id: string;
@@ -73,6 +73,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
   const [isTyping, setIsTyping] = useState(false);
   const [input, setInput] = useState('');
   const [step, setStep] = useState<StepKey>('nombre');
+const [editando, setEditando] = useState<StepKey|null>(null);
   const [history, setHistory] = useState<StepKey[]>([]);
   const [user, setUser] = useState<UserData>({
     nombre: '', edad: '', area: '', motivo: '', modalidad: '', sede: '', horario: '', sintomas: ''
@@ -193,7 +194,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
           if (user.area === 'Salud Mental') await addBot('Sabemos que hablar de salud mental puede ser difícil. Aquí puedes expresarte con confianza y sin prejuicios.');
           else if (user.area === 'Salud Sexual') await addBot('Entendemos que los temas de salud sexual pueden ser un tabú. No te sientas incómodo, aquí puedes hablar con total confianza.');
           else if (user.area === 'Ambas') {
-            await addBot('Puedes seleccionar todos los motivos que apliquen y luego presionar "Continuar".');
+            await addBot('Puedes seleccionar todos los motivos que apliquen y luego presionar ENVIAR.');
           }
         }
         // Opciones de motivos siempre actualizadas
@@ -203,7 +204,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
             ? topicsSexual
             : Array.from(new Set([...topicsMental, ...topicsSexual]));
         const opts = (showAllMotivo || arr.length <= 3)
-          ? (user.area === 'Ambas' ? [...arr, 'Continuar'] : arr)
+          ? arr
           : [...arr.slice(0, 3), `__VER_MAS__(${arr.length - 3})`];
         setOptions(opts);
       })();
@@ -269,7 +270,20 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
 
       case 'resumen':
         await renderSummary();
-        setOptions(['Enviar por WhatsApp', 'Editar']);
+        setOptions(['Enviar por WhatsApp', 'Comenzar de nuevo']);
+        break;
+      case 'editar':
+        await addBot('¿Qué deseas editar?');
+        setOptions([
+          'Nombre y edad',
+          'Área',
+          'Motivo',
+          'Modalidad',
+          'Sede',
+          'Horario',
+          'Síntomas',
+          'Cancelar'
+        ]);
         break;
     }
   };
@@ -393,12 +407,67 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-    useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
+  useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
+
+  // Mostrar el resumen actualizado solo cuando step cambia a 'resumen'
+  const resumenMostradoRef = useRef(false);
+  useEffect(() => {
+    if (step === 'resumen') {
+      if (!resumenMostradoRef.current) {
+        ask('resumen');
+        resumenMostradoRef.current = true;
+      }
+    } else {
+      resumenMostradoRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   // ---------- handler de opciones (INSIDE chat)
   const handleOptionClick = withLock(async () => { /* wrapper; lógica abajo */ });
 
   const handleOption = async (label: string) => {
+  // Edición parcial desde el resumen
+  if (step === 'resumen' && label === 'Comenzar de nuevo') {
+    addUser('Comenzar de nuevo');
+    await resetFlow();
+    return;
+  }
+  if (step === 'resumen' && label === 'Editar') {
+    addUser('Editar');
+    setStep('editar');
+    return await ask('editar');
+  }
+  if (step === 'editar') {
+    if (label === 'Cancelar') {
+      setStep('resumen');
+      setEditando(null);
+      return;
+    }
+    // Mapeo de opciones a StepKey
+    const map: Record<string, StepKey> = {
+      'Nombre y edad': 'nombre',
+      'Área': 'area',
+      'Motivo': 'motivo',
+      'Modalidad': 'modalidad',
+      'Sede': 'sede',
+      'Horario': 'horario',
+      'Síntomas': 'editar_sintomas',
+    };
+    const next = map[label];
+    if (next) {
+      addUser(label);
+      setEditando(next);
+      setStep(next);
+      askedRef.current.delete(next);
+      // Limpiar flags de estado relacionados
+      if (next === 'motivo') setShowAllMotivo(false);
+      if (next === 'modalidad') setUser(u => ({ ...u, sede: '', modalidad: '' }));
+      if (next === 'sede') setUser(u => ({ ...u, sede: '' }));
+      return await ask(next);
+    }
+  }
+
     const val = label.trim();
 
     // 'Ver más' solo expande sin eco ni mensaje
@@ -407,11 +476,21 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
       return;
     }
 
-    // eco del usuario (excepto toggles de "Ambas", que se ecoean al final con “Continuar”)
-    if (!(step === 'motivo' && user.area === 'Ambas')) {
-      addUser(val);
-      setOptions([]); // Oculta inmediatamente las opciones
+    // Si es motivo y área 'Ambas', solo actualiza selección, input y user.motivo
+    if (step === 'motivo' && user.area === 'Ambas') {
+      setUser(u => {
+        const parts = u.motivo ? u.motivo.split(', ').filter(Boolean) : [];
+        const has = parts.includes(val);
+        const next = has ? parts.filter(x => x !== val) : [...parts, val];
+        setInput(next.join(', '));
+        return { ...u, motivo: next.join(', ') };
+      });
+      return;
     }
+
+    // eco del usuario para otros casos
+    addUser(val);
+    setOptions([]); // Oculta inmediatamente las opciones
 
     // Ramas
     switch (step) {
@@ -420,29 +499,40 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
         if (!ok) return;
         setShowAllMotivo(false);
         await new Promise(resolve => setUser(u => { const next = { ...u, area: val, motivo: '' }; resolve(next); return next; }));
-        goTo('motivo');
-        // NO preguntar aquí, lo hará un useEffect
+        if (editando === 'area') {
+          setStep('motivo');
+          askedRef.current.delete('motivo');
+          // Mensaje correcto según área seleccionada
+          if (val === 'Salud Mental') {
+            await addBot('Sabemos que hablar de salud mental puede ser difícil. Aquí puedes expresarte con confianza y sin prejuicios.');
+            setOptions(topicsMental);
+          } else if (val === 'Salud Sexual') {
+            await addBot('Entendemos que los temas de salud sexual pueden ser un tabú. No te sientas incómodo, aquí puedes hablar con total confianza.');
+            setOptions(topicsSexual);
+          } else if (val === 'Ambas') {
+            await addBot('Tanto la salud mental como la sexual son importantes y tratadas con total confidencialidad. Elige el motivo principal de tu consulta.');
+            const all = Array.from(new Set([...topicsMental, ...topicsSexual]));
+            setOptions(all);
+          }
+        } else {
+          goTo('motivo');
+        }
         break;
       }
 
       case 'motivo': {
-        if (user.area === 'Ambas') {
-          if (val === 'Continuar') {
-            if (!user.motivo) { await addBot('Elige al menos una opción antes de continuar.'); return; }
-            // Solo avanza a modalidad y muestra ÚNICAMENTE la pregunta de modalidad
-            goTo('modalidad'); askedRef.current.delete('modalidad'); await ask('modalidad');
-          } else {
-            // toggle interno sin eco
-            setUser(u => {
-              const parts = u.motivo ? u.motivo.split(', ').filter(Boolean) : [];
-              const has = parts.includes(val);
-              const next = has ? parts.filter(x => x !== val) : [...parts, val];
-              return { ...u, motivo: next.join(', ') };
-            });
-          }
+        if (editando === 'area' || editando === 'motivo') {
+          setUser(u => ({ ...u, motivo: val }));
+          setEditando(null);
+          setStep('resumen');
+          setOptions([]);
+        } else if (user.area === 'Ambas') {
+          // No acción aquí, el input y el envío lo maneja el usuario
         } else {
           setUser(u => ({ ...u, motivo: val }));
-          goTo('modalidad'); askedRef.current.delete('modalidad'); await ask('modalidad');
+          setStep('modalidad');
+          askedRef.current.delete('modalidad');
+          await ask('modalidad');
         }
         break;
       }
@@ -451,7 +541,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
         if (!/^(en línea|en linea|online|presencial)$/i.test(val)) return;
         const mod = /^presencial$/i.test(val) ? 'Presencial' : 'En línea';
         setUser(u => ({ ...u, modalidad: mod, sede: mod === 'En línea' ? '' : (u.sede || '') }));
-        if (mod === 'Presencial') {
+        if (editando === 'modalidad') {
+          setEditando(null);
+          setStep('resumen');
+          setOptions([]);
+        } else if (mod === 'Presencial') {
           goTo('sede');
           askedRef.current.delete('sede');
           await ask('sede');
@@ -468,15 +562,29 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
         if (!/^(polanco|santa fe|indistinto)$/i.test(val)) return;
         const cap = val === 'indistinto' ? 'Indistinto' : val.replace(/^\w/, c => c.toUpperCase());
         setUser(u => ({ ...u, sede: cap }));
-        goTo('horario'); askedRef.current.delete('horario'); await ask('horario');
+        if (editando === 'sede') {
+          setEditando(null);
+          setStep('resumen');
+          setOptions([]);
+        } else {
+          goTo('horario');
+          askedRef.current.delete('horario');
+          await ask('horario');
+        }
         break;
       }
 
       case 'horario': {
         if (!HORARIOS.includes(val)) return;
-        setUser(u => ({ ...u, horario: val, sintomas: '' })); // limpia síntomas para permitir nuevo input
-        await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
-        setOptions([]); // a partir de aquí el input libre recoge síntomas
+        setUser(u => ({ ...u, horario: val, sintomas: '' }));
+        if (editando === 'horario') {
+          setEditando(null);
+          setStep('resumen');
+          setOptions([]);
+        } else {
+          await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
+          setOptions([]);
+        }
         break;
       }
 
@@ -540,8 +648,44 @@ Gracias.`;
   };
 
   const handleSend = withLock(async () => {
+  // Si estamos editando solo una sección
+  if (editando && step === editando) {
+    // Procesa el input normalmente, luego vuelve a resumen
     const v = input.trim();
     if (!v) return;
+    addUser(v);
+    setInput('');
+    switch (editando) {
+      case 'nombre': {
+        const [nombre, edad] = v.split(/\s*,\s*|\s+/);
+        setUser(u => ({ ...u, nombre: nombre || '', edad: edad || '' }));
+        break;
+      }
+      case 'area': setUser(u => ({ ...u, area: v })); break;
+      case 'motivo': setUser(u => ({ ...u, motivo: v })); break;
+      case 'modalidad': setUser(u => ({ ...u, modalidad: v })); break;
+      case 'sede': setUser(u => ({ ...u, sede: v })); break;
+      case 'horario': setUser(u => ({ ...u, horario: v })); break;
+      case 'editar_sintomas': setUser(u => ({ ...u, sintomas: v })); break;
+    }
+    setEditando(null);
+    setStep('resumen');
+    // No llamar a ask('resumen') aquí, solo desde useEffect
+    return;
+
+  }
+
+    const v = input.trim();
+    if (!v) return;
+
+    if (step === 'motivo' && user.area === 'Ambas') {
+      setUser(u => ({ ...u, motivo: v }));
+      addUser(v);
+      setInput('');
+      goTo('modalidad'); askedRef.current.delete('modalidad'); await ask('modalidad');
+      return;
+    }
+
     addUser(v);
     setInput('');
 
@@ -559,24 +703,10 @@ Gracias.`;
 
     // síntomas (después del horario, resumen o editar_sintomas)
     if (step === 'horario' || step === 'resumen' || step === 'editar_sintomas') {
-      // Actualiza síntomas primero
+      // Solo actualiza síntomas y pasa a resumen, el useEffect mostrará el resumen actualizado
       await new Promise(resolve => setUser(u => { setTimeout(resolve, 0); return { ...u, sintomas: v }; }));
-      // Muestra el resumen con el valor de síntomas recién escrito
-      const sedeTxt = user.modalidad === 'Presencial' ? (user.sede || '—') : 'N/A (en línea)';
-      const sintomasTxt = v && v.trim() ? v : '—';
-      const summary =
-        `**Resumen de tu solicitud**\n` +
-        `• Nombre: ${user.nombre} (${user.edad})\n` +
-        `• Área: ${user.area}\n` +
-        `• Motivo: ${user.motivo}\n` +
-        `• Modalidad: ${user.modalidad}\n` +
-        `• Sede: ${sedeTxt}\n` +
-        `• Horario: ${user.horario}\n` +
-        `• Síntomas: ${sintomasTxt}\n\n` +
-        `¿Deseas enviarlo por WhatsApp o editar algún dato?`;
-      await addBot(summary);
-      goTo('resumen');
-      setOptions(['Enviar por WhatsApp', 'Editar']);
+      setStep('resumen');
+      setOptions([]);
       return;
     }
 
@@ -610,7 +740,7 @@ Gracias.`;
           : user.area === 'Salud Sexual'
             ? topicsSexual
             : Array.from(new Set([...topicsMental, ...topicsSexual]));
-        return user.area === 'Ambas' ? [...base, 'Continuar'] : base;
+        return base; // Ya no hay botón 'Continuar' para 'Ambas'
       }
       case 'modalidad': return ['En línea', 'Presencial'];
       case 'sede': return ['Polanco', 'Santa Fe', 'Indistinto'];
@@ -662,9 +792,9 @@ Gracias.`;
               </span>
               <span className="double-check" aria-label="Entregado">
                 <svg width="20" height="16" viewBox="0 0 30 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
-  <polyline points="2 14 9 21 23 7" />
-  <polyline points="7 14 14 21 27 7" />
-</svg>
+                  <polyline points="2 14 9 21 23 7" />
+                  <polyline points="7 14 14 21 27 7" />
+                </svg>
               </span>
             </div>
           </div>
@@ -698,28 +828,17 @@ Gracias.`;
                     key={`opt-more`}
                     className="chip chip-more"
                     onClick={() => handleOption('VER_MAS')}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                   >
-                    Ver más
+                    <span style={{ fontWeight: 600, fontSize: '0.98em', letterSpacing: '0.01em' }}>Ver más</span>
+                    <span className="chip-more__arrow">&#8594;</span>
                   </button>
                 );
               }
               const selected =
                 step === 'motivo' &&
                 user.area === 'Ambas' &&
-                c !== 'Continuar' &&
                 (user.motivo ? user.motivo.split(', ').includes(c) : false);
-              // Botón especial para 'Continuar' en motivos ambas
-              if (step === 'motivo' && user.area === 'Ambas' && c === 'Continuar') {
-                return (
-                  <button
-                    key={`opt-continue`}
-                    className="chip chip-continue"
-                    onClick={() => handleOption(c)}
-                  >
-                    Continuar
-                  </button>
-                );
-              }
               return (
                 <button
                   key={`opt-${i}`}
@@ -769,27 +888,34 @@ Gracias.`;
           placeholder={
             step === 'nombre'
               ? 'Escribe tu nombre y edad…'
-              : (step === 'horario' && !user.sintomas)
-                ? 'Describe brevemente tus síntomas…'
-                : (step === 'editar_sintomas')
-                  ? 'Edita tus síntomas…'
-                  : ''
+              : (step === 'motivo' && user.area === 'Ambas')
+                ? 'Selecciona y luego envía tus motivos…'
+                : (step === 'horario' && !user.sintomas)
+                  ? 'Describe brevemente tus síntomas…'
+                  : (step === 'editar_sintomas')
+                    ? 'Edita tus síntomas…'
+                    : ''
           }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           aria-label="Campo de mensaje"
-          style={{ opacity: (step === 'nombre' || (step === 'horario' && !user.sintomas) || step === 'editar_sintomas') ? 1 : 0.35 }}
-          disabled={step !== 'nombre' && step !== 'horario' && step !== 'editar_sintomas'}
+          style={{ opacity: (step === 'nombre' || (step === 'motivo' && user.area === 'Ambas') || (step === 'horario' && !user.sintomas) || step === 'editar_sintomas') ? 1 : 0.35 }}
+          disabled={!(step === 'nombre' || (step === 'motivo' && user.area === 'Ambas') || step === 'horario' || step === 'editar_sintomas')}
         />
 
         <button
           className="chat-send-btn"
           onClick={handleSend}
           disabled={
-            (step !== 'nombre' && step !== 'horario' && step !== 'editar_sintomas') ||
-            !input.trim() ||
-            (step === 'editar_sintomas' && input.trim() === user.sintomas.trim())
+            !(
+              (step === 'nombre' && input.trim()) ||
+              (step === 'motivo' && user.area === 'Ambas' && input.trim()) ||
+              (step === 'horario' && input.trim()) ||
+              (step === 'resumen' && input.trim()) ||
+              (step === 'editar_sintomas' && input.trim() && input.trim() !== user.sintomas.trim()) ||
+              (typeof editando !== 'undefined' && editando === 'editar_sintomas' && step === 'editar_sintomas' && input.trim() && input.trim() !== user.sintomas.trim())
+            )
           }
           aria-label="Enviar mensaje"
         >
