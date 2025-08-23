@@ -393,8 +393,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  useEffect(() => { if (isOpen) inputRef.current?.focus(); }, [isOpen]);
-  useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
+    useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
 
   // ---------- handler de opciones (INSIDE chat)
   const handleOptionClick = withLock(async () => { /* wrapper; lógica abajo */ });
