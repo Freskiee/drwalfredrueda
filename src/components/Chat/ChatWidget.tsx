@@ -381,14 +381,13 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
   useEffect(() => {
     if (!isOpen) return;
     (async () => {
-      await resetFlow(false);   // limpia sin despedida
-      await welcome();          // saluda según initialService
+      await resetFlow(false, false);   // limpia y SIEMPRE saluda según initialService
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialService]);
 
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && !initialService) {
       resetFlow();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -475,12 +474,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
       }
 
       case 'horario': {
-      if (!HORARIOS.includes(val)) return;
-      setUser(u => ({ ...u, horario: val, sintomas: '' })); // limpia síntomas para permitir nuevo input
-      await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
-      setOptions([]); // a partir de aquí el input libre recoge síntomas
-      break;
-    }
+        if (!HORARIOS.includes(val)) return;
+        setUser(u => ({ ...u, horario: val, sintomas: '' })); // limpia síntomas para permitir nuevo input
+        await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
+        setOptions([]); // a partir de aquí el input libre recoge síntomas
+        break;
+      }
 
       case 'resumen': {
         if (/^enviar por whatsapp$/i.test(val)) {
@@ -585,9 +584,10 @@ Gracias.`;
     await addBot('Gracias, continúo con las opciones de arriba.');
   });
 
-  const resetFlow = async (afterSend = false) => {
+  const resetFlow = async (afterSend = false, skipWelcome = false) => {
     setMessages([]);
     setIsTyping(false);
+    await Promise.resolve();
     setInput('');
     setStep('nombre');
     setHistory([]);
@@ -595,7 +595,7 @@ Gracias.`;
     setShowAllMotivo(false);
     askedRef.current = new Set();
     setUser({ nombre: '', edad: '', area: '', motivo: '', modalidad: '', sede: '', horario: '', sintomas: '' });
-    if (messages.length === 0) {
+    if (!skipWelcome) {
       await welcome();
     }
     if (afterSend) lastContextRef.current = normalizeContext(initialService);
@@ -661,11 +661,11 @@ Gracias.`;
                   return ts.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
                 })()}
               </span>
-              <span className="double-check" aria-label="Entregado" style={{ marginLeft: 6, color: '#4fc3f7', fontSize: 13 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
-                  <polyline points="3 12 8 17 21 4" />
-                  <polyline points="7 12 12 17 21 6" />
-                </svg>
+              <span className="double-check" aria-label="Entregado">
+                <svg width="20" height="16" viewBox="0 0 30 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+  <polyline points="2 14 9 21 23 7" />
+  <polyline points="7 14 14 21 27 7" />
+</svg>
               </span>
             </div>
           </div>
