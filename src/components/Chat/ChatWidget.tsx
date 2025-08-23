@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageCircle, Send, X, ChevronLeft } from 'lucide-react';
 
-type StepKey = 'nombre' | 'area' | 'motivo' | 'modalidad' | 'sede' | 'horario' | 'resumen';
+type StepKey = 'nombre' | 'area' | 'motivo' | 'modalidad' | 'sede' | 'horario' | 'resumen' | 'editar_sintomas';
 
 interface ChatMessage {
   id: string;
@@ -65,6 +65,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
   const lockRef = useRef(false);
   const lastContextRef = useRef<string>('');
 
+  // Persistencia de sesión
+  const SESSION_KEY = 'chatDrWalfred';
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [input, setInput] = useState('');
@@ -73,40 +76,61 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onToggle, initialServic
   const [user, setUser] = useState<UserData>({
     nombre: '', edad: '', area: '', motivo: '', modalidad: '', sede: '', horario: '', sintomas: ''
   });
-
-  // 👇 map de intros por cada card de Servicios (ids que ya usas)
-const SERVICE_INTRO: Record<string, { intro: string; area?: 'Salud Mental' | 'Salud Sexual' | 'Ambas' }> = {
-  'estado-animo': {
-    area: 'Salud Mental',
-    intro: 'Estuviste viendo trastornos del estado de ánimo. Podemos acompañarte con un enfoque profesional y cercano.',
-  },
-  'ansiedad': {
-    area: 'Salud Mental',
-    intro: 'Veo que revisabas ansiedad. Puedo orientarte y ayudarte a agendar.',
-  },
-  'terapia-breve': {
-    area: 'Salud Mental',
-    intro: 'Consultaste terapia breve de apoyo. Es un abordaje focalizado y práctico; puedo contarte cómo se trabaja.',
-  },
-  'salud-sexual': {
-    area: 'Salud Sexual',
-    intro: 'Estuviste viendo salud sexual integral. Trabajamos con absoluta confidencialidad y calidez.',
-  },
-  'farmacologica': {
-    area: 'Ambas',
-    intro: 'Revisaste psiquiatría farmacológica. El Dr. Rueda usa tratamientos basados en evidencia y seguimiento cercano.',
-  },
-  'modalidades': {
-    intro: 'Veo que te interesan las modalidades de consulta. Podemos decidir entre en línea o presencial, lo que te acomode.',
-  },
-};
-
-// Opciones inline (dentro del chat, no abajo)
-const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<string[]>([]);
   const [showAllMotivo, setShowAllMotivo] = useState(false);
 
+  // Guardar en sessionStorage
+  useEffect(() => {
+    const payload = JSON.stringify({ user, messages, step, options, showAllMotivo, history });
+    sessionStorage.setItem(SESSION_KEY, payload);
+  }, [user, messages, step, options, showAllMotivo, history]);
+
+  // Restaurar de sessionStorage
+  useEffect(() => {
+    if (!isOpen) return;
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved && (!initialService || normalizeContext(initialService) === lastContextRef.current)) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.user) setUser(parsed.user);
+        if (parsed.messages) setMessages(parsed.messages);
+        if (parsed.step) setStep(parsed.step);
+        if (parsed.options) setOptions(parsed.options);
+        if (parsed.showAllMotivo !== undefined) setShowAllMotivo(parsed.showAllMotivo);
+        if (parsed.history) setHistory(parsed.history);
+      } catch { }
+    }
+  }, [isOpen]);
+
+  // 👇 map de intros por cada card de Servicios (ids que ya usas)
+  const SERVICE_INTRO: Record<string, { intro: string; area?: 'Salud Mental' | 'Salud Sexual' | 'Ambas' }> = {
+    'estado-animo': {
+      area: 'Salud Mental',
+      intro: 'Estuviste viendo trastornos del estado de ánimo. Podemos acompañarte con un enfoque profesional y cercano.',
+    },
+    'ansiedad': {
+      area: 'Salud Mental',
+      intro: 'Veo que revisabas ansiedad. Puedo orientarte y ayudarte a agendar.',
+    },
+    'terapia-breve': {
+      area: 'Salud Mental',
+      intro: 'Consultaste terapia breve de apoyo. Es un abordaje focalizado y práctico; puedo contarte cómo se trabaja.',
+    },
+    'salud-sexual': {
+      area: 'Salud Sexual',
+      intro: 'Estuviste viendo salud sexual integral. Trabajamos con absoluta confidencialidad y calidez.',
+    },
+    'farmacologica': {
+      area: 'Ambas',
+      intro: 'Revisaste psiquiatría farmacológica. El Dr. Rueda usa tratamientos basados en evidencia y seguimiento cercano.',
+    },
+    'modalidades': {
+      intro: 'Veo que te interesan las modalidades de consulta. Podemos decidir entre en línea o presencial, lo que te acomode.',
+    },
+  };
+
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 560;
-  const canGoBack = history.length > 0;
+  const canGoBack = step !== 'nombre' && step !== 'resumen';
 
   const scrollToBottom = () => endRef.current?.scrollIntoView({ behavior: 'smooth' });
 
@@ -127,22 +151,52 @@ const [options, setOptions] = useState<string[]>([]);
     setStep(next);
   };
   const goBack = async () => {
+    if (step === 'resumen') {
+      setStep('editar_sintomas');
+      setOptions([]);
+      await addBot('¿Cuáles son tus síntomas o motivo de consulta?');
+      return;
+    }
+    if (history.length === 0) return;
     const h = [...history];
     const prev = h.pop();
     setHistory(h);
-    if (!prev) { resetFlow(); return; }
+    if (!prev) return;
     setStep(prev);
-    setOptions([]); // limpia opciones al retroceder para re-preguntar
-    askedRef.current.delete(prev);
+    setOptions([]);
     await ask(prev);
   };
 
+  // Pregunta de motivo siempre sincronizada con el área
+  useEffect(() => {
+    if (step === 'motivo' && user.area) {
+      (async () => {
+        // Mensaje solo si cambia el área o paso, no al expandir
+        if (!showAllMotivo) {
+          if (user.area === 'Salud Mental') await addBot('Sabemos que hablar de salud mental puede ser difícil. Aquí puedes expresarte con confianza y sin prejuicios.');
+          else if (user.area === 'Salud Sexual') await addBot('Entendemos que los temas de salud sexual pueden ser un tabú. No te sientas incómodo, aquí puedes hablar con total confianza.');
+          else if (user.area === 'Ambas') {
+            await addBot('Puedes seleccionar todos los motivos que apliquen y luego presionar "Continuar".');
+          }
+        }
+        // Opciones de motivos siempre actualizadas
+        const arr = user.area === 'Salud Mental'
+          ? topicsMental
+          : user.area === 'Salud Sexual'
+            ? topicsSexual
+            : Array.from(new Set([...topicsMental, ...topicsSexual]));
+        const opts = (showAllMotivo || arr.length <= 3)
+          ? (user.area === 'Ambas' ? [...arr, 'Continuar'] : arr)
+          : [...arr.slice(0, 3), `__VER_MAS__(${arr.length - 3})`];
+        setOptions(opts);
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAllMotivo, step, user.area]);
+
   // ---- Preguntas + set de opciones (siempre inline)
   const ask = async (k: StepKey) => {
-    if (k !== 'motivo' && askedRef.current.has(k)) return;
-    askedRef.current.add(k);
-    setOptions([]); // evita que queden chips viejos en pantalla
-
+    setOptions([]);
     switch (k) {
       case 'nombre':
         await addBot('¡Hola! 👋 Soy el asistente del Dr. Walfred Rueda. Me da gusto ayudarte.\n\n¿Me compartes tu nombre y edad para comenzar? 😊');
@@ -159,26 +213,22 @@ const [options, setOptions] = useState<string[]>([]);
       }
 
       case 'motivo': {
+        // Helper para chips
+        const renderMotivoOptions = (arr: string[]) => {
+          if (showAllMotivo || arr.length <= 3) return arr;
+          const n = arr.length - 3;
+          return [...arr.slice(0, 3), `__VER_MAS__(${n})`];
+        };
         if (user.area === 'Salud Mental') {
           await addBot('Sabemos que hablar de salud mental puede ser difícil. Aquí puedes expresarte con confianza y sin prejuicios.');
-          setOptions(topicsMental);
+          setOptions(renderMotivoOptions(topicsMental));
         } else if (user.area === 'Salud Sexual') {
           await addBot('Entendemos que los temas de salud sexual pueden ser un tabú. No te sientas incómodo, aquí puedes hablar con total confianza.');
-          let opts: string[];
-          if (!isMobile || showAllMotivo) {
-            opts = topicsSexual;
-          } else if (topicsSexual.length > 6) {
-            opts = [...topicsSexual.slice(0, 6), 'Ver más…'];
-          } else {
-            opts = topicsSexual;
-          }
-          setOptions(opts);
+          setOptions(renderMotivoOptions(topicsSexual));
         } else if (user.area === 'Ambas') {
           await addBot('Tanto la salud mental como la sexual son importantes y tratadas con total confidencialidad. Elige el motivo principal de tu consulta.');
           const all = Array.from(new Set([...topicsMental, ...topicsSexual]));
-          const max = isMobile && !showAllMotivo ? 6 : all.length;
-          const opts = all.slice(0, max);
-          setOptions(all.length > 6 && !showAllMotivo ? [...opts, 'Ver más…', 'Continuar'] : [...opts, 'Continuar']);
+          setOptions(renderMotivoOptions(all));
         } else {
           setOptions([]);
         }
@@ -209,15 +259,16 @@ const [options, setOptions] = useState<string[]>([]);
 
   const renderSummary = async () => {
     const sedeTxt = user.modalidad === 'Presencial' ? (user.sede || '—') : 'N/A (en línea)';
+    const sintomasTxt = user.sintomas && user.sintomas.trim() ? user.sintomas : '—';
     const summary =
-`**Resumen de tu solicitud**
+      `**Resumen de tu solicitud**
 • Nombre: ${user.nombre} (${user.edad})
 • Área: ${user.area}
 • Motivo: ${user.motivo}
 • Modalidad: ${user.modalidad}
 • Sede: ${sedeTxt}
 • Horario: ${user.horario}
-• Síntomas: ${user.sintomas || '—'}
+• Síntomas: ${sintomasTxt}
 
 ¿Deseas enviarlo por WhatsApp o editar algún dato?`;
     await addBot(summary);
@@ -230,53 +281,53 @@ const [options, setOptions] = useState<string[]>([]);
   };
 
   // ---- Saludo contextual + reseteo si cambias de sección
-const welcome = async () => {
-  const key = (initialService || '').toLowerCase().trim();
+  const welcome = async () => {
+    const key = (initialService || '').toLowerCase().trim();
 
-  // Desde Servicios
-  if (key.startsWith('services:')) {
-    const id = key.split(':')[1] || '';
-    const cfg = SERVICE_INTRO[id];
-    if (cfg?.area) setUser(u => ({ ...u, area: cfg.area || '' }));
-    const intro = cfg?.intro || 'Puedo orientarte y ayudarte a agendar.';
+    // Desde Servicios
+    if (key.startsWith('services:')) {
+      const id = key.split(':')[1] || '';
+      const cfg = SERVICE_INTRO[id];
+      if (cfg?.area) setUser(u => ({ ...u, area: cfg.area || '' }));
+      const intro = cfg?.intro || 'Puedo orientarte y ayudarte a agendar.';
 
-    await addBot(`${intro}\n\n¿Me compartes tu nombre y edad? 😊`);
-    askedRef.current.add('nombre');
-    return;
-  }
+      await addBot(`${intro}\n\n¿Me compartes tu nombre y edad? 😊`);
+      askedRef.current.add('nombre');
+      return;
+    }
 
-  // Desde Ubicaciones
-  if (key.startsWith('locations:')) {
-    const loc = key.split(':')[1];
-    const sede = loc === 'polanco' ? 'Polanco' : loc === 'santafe' ? 'Santa Fe' : undefined;
-    if (sede) setUser(u => ({ ...u, modalidad: 'Presencial', sede }));
+    // Desde Ubicaciones
+    if (key.startsWith('locations:')) {
+      const loc = key.split(':')[1];
+      const sede = loc === 'polanco' ? 'Polanco' : loc === 'santafe' ? 'Santa Fe' : undefined;
+      if (sede) setUser(u => ({ ...u, modalidad: 'Presencial', sede }));
 
+      await addBot(
+        `Hola. Noté que vienes de **Ubicaciones** (${sede ?? 'sede'}). ` +
+        (sede ? `¿Te gustaría agendar en **${sede}** o prefieres en línea?\n\n` : '\n\n') +
+        `Para comenzar, ¿tu nombre y edad? 😊`
+      );
+      askedRef.current.add('nombre');
+      return;
+    }
+
+    // Desde Contacto
+    if (key === 'contact') {
+      await addBot(
+        '¡Hola! Desde **Contacto** puedo ayudarte a coordinar tu consulta de forma sencilla.\n\n' +
+        '¿Me compartes tu nombre y edad? 😊'
+      );
+      askedRef.current.add('nombre');
+      return;
+    }
+
+    // Default (burbuja flotante)
     await addBot(
-      `Hola. Noté que vienes de **Ubicaciones** (${sede ?? 'sede'}). ` +
-      (sede ? `¿Te gustaría agendar en **${sede}** o prefieres en línea?\n\n` : '\n\n') +
-      `Para comenzar, ¿tu nombre y edad? 😊`
-    );
-    askedRef.current.add('nombre');
-    return;
-  }
-
-  // Desde Contacto
-  if (key === 'contact') {
-    await addBot(
-      '¡Hola! Desde **Contacto** puedo ayudarte a coordinar tu consulta de forma sencilla.\n\n' +
+      '¡Hola! 👋 Soy el asistente del Dr. Walfred Rueda. Estoy para ayudarte a agendar o resolver dudas.\n\n' +
       '¿Me compartes tu nombre y edad? 😊'
     );
     askedRef.current.add('nombre');
-    return;
-  }
-
-  // Default (burbuja flotante)
-  await addBot(
-    '¡Hola! 👋 Soy el asistente del Dr. Walfred Rueda. Estoy para ayudarte a agendar o resolver dudas.\n\n' +
-    '¿Me compartes tu nombre y edad? 😊'
-  );
-  askedRef.current.add('nombre');
-};
+  };
 
   const startIfNeeded = async () => {
     if (messages.length === 0) {
@@ -311,17 +362,16 @@ const welcome = async () => {
   const handleOption = async (label: string) => {
     const val = label.trim();
 
-    // “Ver más…” solo expande sin eco
-    if (val === 'Ver más…') {
+    // 'Ver más' solo expande sin eco ni mensaje
+    if (val === 'VER_MAS') {
       setShowAllMotivo(true);
-      askedRef.current.delete('motivo');
-      await ask('motivo');
       return;
     }
 
     // eco del usuario (excepto toggles de "Ambas", que se ecoean al final con “Continuar”)
-    if (!(step === 'motivo' && user.area === 'Ambas' && val !== 'Continuar')) {
+    if (!(step === 'motivo' && user.area === 'Ambas')) {
       addUser(val);
+      setOptions([]); // Oculta inmediatamente las opciones
     }
 
     // Ramas
@@ -329,10 +379,10 @@ const welcome = async () => {
       case 'area': {
         const ok = ['Salud Mental', 'Salud Sexual', 'Ambas'].includes(val);
         if (!ok) return;
-        await new Promise(resolve => setUser(u => { const next = { ...u, area: val, motivo: '' }; resolve(next); return next; }));
         setShowAllMotivo(false);
-        askedRef.current.delete('motivo');
-        await ask('motivo');
+        await new Promise(resolve => setUser(u => { const next = { ...u, area: val, motivo: '' }; resolve(next); return next; }));
+        goTo('motivo');
+        // NO preguntar aquí, lo hará un useEffect
         break;
       }
 
@@ -340,8 +390,7 @@ const welcome = async () => {
         if (user.area === 'Ambas') {
           if (val === 'Continuar') {
             if (!user.motivo) { await addBot('Elige al menos una opción antes de continuar.'); return; }
-            // eco final con lo elegido
-            addUser(user.motivo);
+            // Solo avanza a modalidad y muestra ÚNICAMENTE la pregunta de modalidad
             goTo('modalidad'); askedRef.current.delete('modalidad'); await ask('modalidad');
           } else {
             // toggle interno sin eco
@@ -362,9 +411,17 @@ const welcome = async () => {
       case 'modalidad': {
         if (!/^(en línea|en linea|online|presencial)$/i.test(val)) return;
         const mod = /^presencial$/i.test(val) ? 'Presencial' : 'En línea';
-        setUser(u => ({ ...u, modalidad: mod, sede: mod === 'En línea' ? '' : u.sede }));
-        if (mod === 'Presencial') { goTo('sede'); askedRef.current.delete('sede'); await ask('sede'); }
-        else { goTo('horario'); askedRef.current.delete('horario'); await ask('horario'); }
+        setUser(u => ({ ...u, modalidad: mod, sede: mod === 'En línea' ? '' : (u.sede || '') }));
+        if (mod === 'Presencial') {
+          goTo('sede');
+          askedRef.current.delete('sede');
+          await ask('sede');
+        } else {
+          setUser(u => ({ ...u, sede: '' }));
+          goTo('horario');
+          askedRef.current.delete('horario');
+          await ask('horario');
+        }
         break;
       }
 
@@ -377,18 +434,18 @@ const welcome = async () => {
       }
 
       case 'horario': {
-        if (!HORARIOS.includes(val)) return;
-        setUser(u => ({ ...u, horario: val }));
-        await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
-        setOptions([]); // a partir de aquí el input libre recoge síntomas
-        break;
-      }
+      if (!HORARIOS.includes(val)) return;
+      setUser(u => ({ ...u, horario: val, sintomas: '' })); // limpia síntomas para permitir nuevo input
+      await addBot('Gracias. Antes de confirmar, ¿podrías contarme brevemente tus síntomas o motivo? (escríbelo abajo)');
+      setOptions([]); // a partir de aquí el input libre recoge síntomas
+      break;
+    }
 
       case 'resumen': {
         if (/^enviar por whatsapp$/i.test(val)) {
           const sedeTxt = user.modalidad === 'Presencial' ? (user.sede || '—') : 'N/A (en línea)';
           const m =
-`Hola Dr. Rueda, me gustaría agendar una consulta.
+            `Hola Dr. Rueda, me gustaría agendar una consulta.
 
 • Nombre: ${user.nombre} (${user.edad})
 • Área: ${user.area}
@@ -401,6 +458,7 @@ const welcome = async () => {
 Gracias.`;
           window.open(`https://wa.me/525512999642?text=${encodeURIComponent(m)}`, '_blank');
           resetFlow(true);
+          onToggle();
           return;
         }
         if (/^editar$/i.test(val)) {
@@ -411,16 +469,32 @@ Gracias.`;
         }
 
         // clic en opción de edición
-        const map: Record<string, StepKey> = {
+        const map: Record<string, StepKey | 'editar_sintomas'> = {
           'Nombre y edad': 'nombre',
           'Área': 'area',
           'Motivo': 'motivo',
           'Modalidad': 'modalidad',
           'Sede': 'sede',
           'Horario': 'horario',
-          'Síntomas': 'horario',
+          'Síntomas': 'editar_sintomas',
         };
-        if (map[val]) { setOptions([]); setStep(map[val]); askedRef.current.delete(map[val]); await ask(map[val]); }
+        if (map[val]) {
+          setOptions([]);
+          if (map[val] === 'editar_sintomas') {
+            setInput(user.sintomas || '');
+            await addBot('¿Cuáles son tus síntomas o motivo de consulta?');
+            setStep('editar_sintomas');
+            setOptions([]);
+          } else {
+            setStep(map[val] as StepKey);
+            askedRef.current.delete(map[val] as StepKey);
+            // Limpiar flags de estado relacionados
+            if (map[val] === 'motivo') setShowAllMotivo(false);
+            if (map[val] === 'modalidad') setUser(u => ({ ...u, sede: '', modalidad: '' }));
+            if (map[val] === 'sede') setUser(u => ({ ...u, sede: '' }));
+            await ask(map[val] as StepKey);
+          }
+        }
         break;
       }
     }
@@ -444,10 +518,26 @@ Gracias.`;
       return;
     }
 
-    // síntomas (después del horario)
-    if (!user.sintomas && user.horario) {
-      setUser(u => ({ ...u, sintomas: v }));
-      goTo('resumen'); askedRef.current.delete('resumen'); await ask('resumen');
+    // síntomas (después del horario, resumen o editar_sintomas)
+    if (step === 'horario' || step === 'resumen' || step === 'editar_sintomas') {
+      // Actualiza síntomas primero
+      await new Promise(resolve => setUser(u => { setTimeout(resolve, 0); return { ...u, sintomas: v }; }));
+      // Muestra el resumen con el valor de síntomas recién escrito
+      const sedeTxt = user.modalidad === 'Presencial' ? (user.sede || '—') : 'N/A (en línea)';
+      const sintomasTxt = v && v.trim() ? v : '—';
+      const summary =
+        `**Resumen de tu solicitud**\n` +
+        `• Nombre: ${user.nombre} (${user.edad})\n` +
+        `• Área: ${user.area}\n` +
+        `• Motivo: ${user.motivo}\n` +
+        `• Modalidad: ${user.modalidad}\n` +
+        `• Sede: ${sedeTxt}\n` +
+        `• Horario: ${user.horario}\n` +
+        `• Síntomas: ${sintomasTxt}\n\n` +
+        `¿Deseas enviarlo por WhatsApp o editar algún dato?`;
+      await addBot(summary);
+      goTo('resumen');
+      setOptions(['Enviar por WhatsApp', 'Editar']);
       return;
     }
 
@@ -473,7 +563,7 @@ Gracias.`;
   // Opciones solo en barra inferior
   const currentOptions = (() => {
     switch (step) {
-      case 'area':     return ['Salud Mental', 'Salud Sexual', 'Ambas'];
+      case 'area': return ['Salud Mental', 'Salud Sexual', 'Ambas'];
       case 'motivo': {
         const base = user.area === 'Salud Mental'
           ? topicsMental
@@ -483,10 +573,10 @@ Gracias.`;
         return user.area === 'Ambas' ? [...base, 'Continuar'] : base;
       }
       case 'modalidad': return ['En línea', 'Presencial'];
-      case 'sede':      return ['Polanco', 'Santa Fe', 'Indistinto'];
-      case 'horario':   return HORARIOS;
-      case 'resumen':   return ['Enviar por WhatsApp', 'Editar', 'Cancelar'];
-      default:          return [];
+      case 'sede': return ['Polanco', 'Santa Fe', 'Indistinto'];
+      case 'horario': return HORARIOS;
+      case 'resumen': return ['Enviar por WhatsApp', 'Editar', 'Cancelar'];
+      default: return [];
     }
   })();
 
@@ -517,7 +607,19 @@ Gracias.`;
           <div key={m.id} className={`message ${m.type}`}>
             <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
             <div className="message-time">
-              {m.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+              <span className="chat-time">
+                {(() => {
+                  let ts = m.timestamp;
+                  if (!(ts instanceof Date)) ts = new Date(ts);
+                  return ts.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                })()}
+              </span>
+              <span className="double-check" aria-label="Entregado" style={{ marginLeft: 6, color: '#4fc3f7', fontSize: 13 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+                  <polyline points="3 12 8 17 21 4" />
+                  <polyline points="7 12 12 17 21 6" />
+                </svg>
+              </span>
             </div>
           </div>
         ))}
@@ -543,12 +645,35 @@ Gracias.`;
             }}
           >
             {options.map((c, i) => {
+              if (c.startsWith('__VER_MAS__')) {
+                // Chip especial para ver más
+                return (
+                  <button
+                    key={`opt-more`}
+                    className="chip chip-more"
+                    onClick={() => handleOption('VER_MAS')}
+                  >
+                    Ver más
+                  </button>
+                );
+              }
               const selected =
                 step === 'motivo' &&
                 user.area === 'Ambas' &&
                 c !== 'Continuar' &&
                 (user.motivo ? user.motivo.split(', ').includes(c) : false);
-
+              // Botón especial para 'Continuar' en motivos ambas
+              if (step === 'motivo' && user.area === 'Ambas' && c === 'Continuar') {
+                return (
+                  <button
+                    key={`opt-continue`}
+                    className="chip chip-continue"
+                    onClick={() => handleOption(c)}
+                  >
+                    Continuar
+                  </button>
+                );
+              }
               return (
                 <button
                   key={`opt-${i}`}
@@ -568,13 +693,12 @@ Gracias.`;
       {/* Barra inferior (Atrás + input SOLO donde aplica) */}
       <div className="chat-input-area">
         <button
-          className="btn btn-outline-secondary"
-          style={{ borderRadius: 24, padding: '0 12px', minWidth: 44, opacity: canGoBack ? 1 : 0.45, pointerEvents: canGoBack ? 'auto' : 'none' }}
-          onClick={goBack}
-          aria-label="Atrás"
-          title="Atrás"
+          className="chat-back"
+          aria-label="Regresar"
+          onClick={async () => { await goBack(); }}
+          style={{ display: canGoBack ? 'block' : 'none' }}
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={22} />
         </button>
 
         <input
@@ -584,19 +708,28 @@ Gracias.`;
           placeholder={
             step === 'nombre'
               ? 'Escribe tu nombre y edad…'
-              : (!user.sintomas && user.horario ? 'Describe brevemente tus síntomas…' : 'Escribe tu mensaje…')
+              : (step === 'horario' && !user.sintomas)
+                ? 'Describe brevemente tus síntomas…'
+                : (step === 'editar_sintomas')
+                  ? 'Edita tus síntomas…'
+                  : ''
           }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           aria-label="Campo de mensaje"
-          style={{ opacity: (step === 'nombre' || (!user.sintomas && user.horario)) ? 1 : 0.35 }}
+          style={{ opacity: (step === 'nombre' || (step === 'horario' && !user.sintomas) || step === 'editar_sintomas') ? 1 : 0.35 }}
+          disabled={step !== 'nombre' && step !== 'horario' && step !== 'editar_sintomas'}
         />
 
         <button
           className="chat-send-btn"
           onClick={handleSend}
-          disabled={!(step === 'nombre' || (!user.sintomas && user.horario)) || !input.trim()}
+          disabled={
+            (step !== 'nombre' && step !== 'horario' && step !== 'editar_sintomas') ||
+            !input.trim() ||
+            (step === 'editar_sintomas' && input.trim() === user.sintomas.trim())
+          }
           aria-label="Enviar mensaje"
         >
           <Send size={16} />
