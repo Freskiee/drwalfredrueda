@@ -1,6 +1,52 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 
+function FacebookCard({ title, embedUrlAutoplay, watchUrl, poster }: { title: string; embedUrlAutoplay: string; watchUrl: string; poster: string }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <div className="card shadow-custom video-card h-100">
+      <div className="video-embed">
+        {!playing ? (
+          <button
+            className="video-poster"
+            onClick={() => setPlaying(true)}
+            aria-label={`Reproducir: ${title}`}
+            style={{ backgroundImage: `url(${poster})` }}
+          >
+            <span className="video-playpulse" />
+            <svg width="54" height="54" viewBox="0 0 54 54" fill="none" aria-hidden="true">
+              <circle cx="27" cy="27" r="27" fill="rgba(0,0,0,0.45)" />
+              <path d="M22 18l16 9-16 9V18z" fill="#fff" />
+            </svg>
+          </button>
+        ) : (
+          <iframe
+            src={embedUrlAutoplay}
+            title={title}
+            scrolling="no"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+          />
+        )}
+      </div>
+      <div className="video-caption">
+        <h6 className="mb-1">{title}</h6>
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="subtle-cta"
+        >
+          <ExternalLink size={16} className="me-2" />
+          Ver en Facebook
+        </a>
+      </div>
+    </div>
+  );
+}
+
+
 /* ---- Card YouTube con póster ---- */
 function YouTubeCard({
   title,
@@ -92,9 +138,9 @@ const Videos: React.FC = () => {
 
   // Facebook: plugin embebido directo
   const fbWatch = "https://www.facebook.com/watch/?v=399258438928709";
-  const fbEmbed = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+  const fbEmbedAutoplay = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
     fbWatch
-  )}&show_text=false&height=315&width=560&allowfullscreen=true`;
+  )}&show_text=false&height=315&width=560&allowfullscreen=true&autoplay=1`;
 
   return (
     <section id="videos" className="py-5 bg-white" ref={rootRef}>
@@ -136,35 +182,17 @@ const Videos: React.FC = () => {
             />
           </div>
 
-          {/* Facebook embebido */}
+          {/* Facebook embebido con miniatura personalizada */}
           <div
             className="col-lg-4 col-md-6 reveal-base reveal-up"
             data-reveal-delay="260"
           >
-            <div className="card shadow-custom video-card h-100">
-              <div className="video-embed">
-                <iframe
-                  src={fbEmbed}
-                  title="Proyecto Mente Creativa"
-                  scrolling="no"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  loading="lazy"
-                />
-              </div>
-              <div className="video-caption">
-                <h6 className="mb-1">Proyecto Mente Creativa</h6>
-                <a
-                  href={fbWatch}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="subtle-cta"
-                >
-                  <ExternalLink size={16} className="me-2" />
-                  Ver en Facebook
-                </a>
-              </div>
-            </div>
+            <FacebookCard
+              title="Proyecto Mente Creativa"
+              embedUrlAutoplay={fbEmbedAutoplay}
+              watchUrl={fbWatch}
+              poster="/images/fb-video-1.png"
+            />
           </div>
         </div>
       </div>
