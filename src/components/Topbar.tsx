@@ -9,12 +9,12 @@ const Topbar: React.FC = () => {
           <div className="col-12 d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center gap-3">
               <a 
-                href="tel:+525512999642" 
+                href="tel:+525591060145" 
                 className="d-flex align-items-center gap-1"
                 aria-label="Llamar al consultorio 55 1299 9642"
               >
                 <Phone size={14} />
-                <span className="d-none d-sm-inline">55 1299 9642</span>
+                <span className="d-none d-sm-inline">55 91 06 01 45</span>
               </a>
               <a 
                 href="mailto:contacto@walfredrrueda.com" 
@@ -29,7 +29,7 @@ const Topbar: React.FC = () => {
               <a href="#" aria-label="Facebook">
                 <Facebook size={14} />
               </a>
-              <a href="#" aria-label="Instagram">
+              <a href="https://www.instagram.com/drwalfredrueda/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <Instagram size={14} />
               </a>
               <a href="#" aria-label="Twitter">

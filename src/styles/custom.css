@@ -3,7 +3,7 @@
 :root {
   /* Paleta original */
   --primary-color: #0F3E57;
-  --secondary-color: #9aaee8;
+  --secondary-color: #60A5FA;
   --accent-color: #4A90A4;
   --background-light: #F6F8FA;
   --text-light: #6C757D;
@@ -1956,7 +1956,7 @@ html:not(.js-enabled) .reveal-base {
 }
 
 .hero-lead {
-  color: rgba(237, 241, 247, .95);
+  color: #E5E7EB;
   font-size: clamp(1rem, 1.8vw, 1.125rem);
   font-weight: 400;
 }

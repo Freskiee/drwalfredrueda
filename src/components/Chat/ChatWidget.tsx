@@ -603,7 +603,7 @@ const [editando, setEditando] = useState<StepKey|null>(null);
 • Síntomas: ${user.sintomas || '—'}
 
 Gracias.`;
-          window.open(`https://wa.me/525512999642?text=${encodeURIComponent(m)}`, '_blank');
+          window.open(`https://wa.me/5591060145?text=${encodeURIComponent(m)}`, '_blank');
           resetFlow(true);
           onToggle();
           return;

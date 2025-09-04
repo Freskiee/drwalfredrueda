@@ -86,7 +86,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenChat }) => {
                 </button>
 
                 <a
-                  href="https://wa.me/525512999642"
+                  href="https://wa.me/5591060145"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn hero-ghost d-inline-flex align-items-center justify-content-center"

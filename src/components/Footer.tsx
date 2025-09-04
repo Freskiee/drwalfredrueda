@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
             <ul className="f-links">
               <li className="f-row">
                 <Phone size={14} className="me-2" aria-hidden="true" />
-                <a href="tel:+525512999642">55&nbsp;12&nbsp;99&nbsp;96&nbsp;42</a>
+                <a href="tel:+5591060145">55&nbsp;91&nbsp;06&nbsp;01&nbsp;45</a>
               </li>
               <li className="f-row">
                 <Mail size={14} className="me-2" aria-hidden="true" />
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
             <h6 className="f-title">Redes sociales</h6>
             <div className="f-social">
               <a className="f-chip" href="#" aria-label="Facebook"><Facebook size={16} /></a>
-              <a className="f-chip" href="#" aria-label="Instagram"><Instagram size={16} /></a>
+              <a className="f-chip" href="https://www.instagram.com/drwalfredrueda/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={16} /></a>
               <a className="f-chip" href="#" aria-label="Twitter"><Twitter size={16} /></a>
             </div>
           </section>

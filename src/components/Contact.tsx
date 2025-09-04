@@ -172,7 +172,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
 
                 <div className="d-flex flex-column gap-2">
                   <a
-                    href="tel:+525512999642"
+                    href="tel:+5591060145"
                     className="pill-btn pill-outline d-inline-flex align-items-center justify-content-center"
                     aria-label="Llamar al consultorio"
                   >
@@ -188,7 +188,7 @@ const Contact: React.FC<ContactProps> = ({ onOpenChat }) => {
                     Email
                   </a>
                   <a
-                    href="https://wa.me/525512999642"
+                    href="https://wa.me/5591060145"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pill-btn pill-outline d-inline-flex align-items-center justify-content-center"
